@@ -1,0 +1,6 @@
+@morla.hosts.server_HostAddress = http://localhost:5148
+
+GET {{morla.hosts.server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

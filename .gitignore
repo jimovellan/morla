@@ -1,0 +1,50 @@
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+*.mdf
+*.ldf
+*.ndf
+
+# IDE
+.vs/
+.vscode/
+*.swp
+*.swo
+*.user
+*.suo
+*.csproj.user
+
+# Build
+bin/
+obj/
+*.o
+*.a
+*.so
+*.dylib
+*.dll
+*.exe
+*.out
+
+# NuGet
+.nuget/
+packages/
+*.nupkg
+*.snupkg
+
+# Environment
+.env
+.env.local
+appsettings.local.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Rider
+.idea/
+*.iml
+
+# Misc
+.vs_code
+launchSettings.json
