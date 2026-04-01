@@ -34,7 +34,7 @@ public class KnowledgeRepository : IKnowledgeRepository
         try
         {
             var folderPath = Path.Combine(AppContext.BaseDirectory, "models");
-            var filePath = Path.Combine(folderPath, "model.onnx");
+           
             
             if (!Directory.Exists(folderPath))
             {
@@ -43,7 +43,7 @@ public class KnowledgeRepository : IKnowledgeRepository
 
             var _options = new LocalEmbeddingsOptions
             {
-                ModelPath = filePath,
+                ModelPath = folderPath,
                 
               
             };
