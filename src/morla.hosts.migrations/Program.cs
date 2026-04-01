@@ -10,7 +10,7 @@ using Morla.Infrastructure.Extensions;
 var builder = Host.CreateDefaultBuilder(args);
 builder.ConfigureServices((_, services) =>
 {
-    services.AddArchitectureServices();
+    services.AddCoreServices();
 });
 
 var host = builder.Build();

@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Morla.Domain.Models;
+using Morla.Infrastructure.Database.Interceptors;
 
 namespace Morla.Infrastructure.Database
 {
@@ -11,6 +12,12 @@ namespace Morla.Infrastructure.Database
         }
 
         public DbSet<Knowledge> Knowledges { get; set; }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            base.OnConfiguring(optionsBuilder);
+            optionsBuilder.AddInterceptors(new VssInterceptor());
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

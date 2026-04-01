@@ -19,7 +19,13 @@ namespace morla.infrastructure.Migrations
 
             modelBuilder.Entity("Morla.Domain.Models.Knowledge", b =>
                 {
-                    b.Property<string>("Id")
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("RowId")
+                        .IsRequired()
+                        .HasMaxLength(36)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Content")
@@ -50,6 +56,8 @@ namespace morla.infrastructure.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
+
+                    b.HasAlternateKey("RowId");
 
                     b.ToTable("Knowledges", (string)null);
                 });

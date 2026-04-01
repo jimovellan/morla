@@ -11,8 +11,8 @@ using Morla.Infrastructure.Database;
 namespace morla.infrastructure.Migrations
 {
     [DbContext(typeof(MorlaContext))]
-    [Migration("20260324195608_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260328081238_inicial")]
+    partial class inicial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

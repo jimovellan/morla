@@ -3,9 +3,12 @@ using System.Data.Common;
 using MediatR;
 using ModelContextProtocol.Server;
 using Morla.Application.UseCases.Commands.CreateKnowledge;
+using Morla.Application.UseCases.Commands.UpdateKnowledge;
 using Morla.Application.UseCases.Queries.SearchKnowledge;
+using Morla.Application.UseCases.Queries.GetKnowledgeById;
 using Morla.Domain.Models;
 using Morla.Domain.Repository;
+using Serilog;
 
 namespace morla.infrastructure.tools;
 
@@ -15,45 +18,122 @@ public class KnowledgeTools
     private readonly IKnowledgeRepository _knowledgeRepository;
     private readonly ISender _sender;
 
-    public KnowledgeTools(ISender sender)
+    public KnowledgeTools(ISender sender, IKnowledgeRepository knowledgeRepository)
     {
         _sender = sender;
+        _knowledgeRepository = knowledgeRepository;
     }
 
     [McpServerTool, Description("Tool to create a new knowledge entry")]
     public async Task<string> SetKnowledge(string topic, string title, string project, string summary, string content)
     {
-        var knowledge = new Knowledge
+        try
         {
-            Id = Guid.NewGuid().ToString(),
-            Topic = topic,
-            Title = title,
-            Project = project,
-            Summary = summary,
-            Content = content,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
-        };
-        var result = await _sender.Send(new CreateKnowledgeCommand(topic, title, project, summary, content));
+            Log.Information("KnowledgeTools.SetKnowledge: Iniciando creación de entrada...");
+            Log.Debug("  - Topic: {Topic}, Title: {Title}, Project: {Project}", topic, title, project);
+            
+            var knowledge = new Knowledge
+            {
+                // Id se genera automáticamente en la BD (AUTOINCREMENT)
+                RowId = Guid.NewGuid().ToString(),  // ✅ GUID para referencia externa
+                Topic = topic,
+                Title = title,
+                Project = project,
+                Summary = summary,
+                Content = content,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+            
+            Log.Information("KnowledgeTools.SetKnowledge: Enviando comando CreateKnowledge...");
+            var result = await _sender.Send(new CreateKnowledgeCommand(topic, title, project, summary, content));
 
-        return $"Knowledge entry created successfully with ID: {result}";
+            Log.Information("KnowledgeTools.SetKnowledge: Entrada creada exitosamente con ID {KnowledgeId}", result);
+            return $"Knowledge entry created successfully with ID: {result}";
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "KnowledgeTools.SetKnowledge: Error al crear entrada");
+            throw;
+        }
     }
 
-    [McpServerTool, Description("Tool to get a knowledge entry by semantic search term")]
-    public async Task<List<SearchKnowledgeDto>> GetKnowledge(string semanticSearchTerm)
+    [McpServerTool, Description("Tool to search knowledge entries with flexible filtering by search term, topic, and/or project")]
+    public async Task<List<SearchKnowledgeDto>> SearchKnowledge(string? searchTerm = null, string? topic = null, string? project = null)
     {
-        var result = await _sender.Send(new SearchKnowledgeQuery(semanticSearchTerm));
-        return result;
+        try
+        {
+            Log.Information("KnowledgeTools.SearchKnowledge: Iniciando búsqueda...");
+            Log.Debug("  - SearchTerm: {SearchTerm}, Topic: {Topic}, Project: {Project}", searchTerm ?? "null", topic ?? "null", project ?? "null");
+            
+            var result = await _sender.Send(new SearchKnowledgeQuery(searchTerm, topic, project));
+            
+            Log.Information("KnowledgeTools.SearchKnowledge: Búsqueda completada. Resultados encontrados: {ResultCount}", result.Count);
+            return result;
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "KnowledgeTools.SearchKnowledge: Error en la búsqueda");
+            throw;
+        }
     }
 
     [McpServerTool, Description("Tool to get a knowledge entry by ID")]
-    public async Task<string> GetKnowledgeById(string id)
+    public async Task<GetKnowledgeByIdDto> GetKnowledgeById(string id)
     {
-        var knowledge = await _knowledgeRepository.GetByIdAsync(id);
-        if (knowledge == null)
+        try
         {
-            return $"Knowledge entry with ID {id} not found.";
+            Log.Information("KnowledgeTools.GetKnowledgeById: Obteniendo entrada con ID {KnowledgeId}", id);
+            
+            var result = await _sender.Send(new GetKnowledgeByIdQuery(id));
+            
+            Log.Information("KnowledgeTools.GetKnowledgeById: Entrada obtenida exitosamente");
+            return result;
         }
-        return $"ID: {knowledge.Id}\nTitle: {knowledge.Title}\nSummary: {knowledge.Summary}\nContent: {knowledge.Content}";
+        catch (Exception ex)
+        {
+            Log.Error(ex, "KnowledgeTools.GetKnowledgeById: Error al obtener entrada con ID {KnowledgeId}", id);
+            throw;
+        }
+    }
+
+    [McpServerTool, Description("Tool to update knowledge content by ID")]
+    public async Task<UpdateKnowledgeDto> UpdateKnowledgeById(string id, string resumen, string content)
+    {
+        try
+        {
+            Log.Information("KnowledgeTools.UpdateKnowledgeById: Actualizando entrada con ID {KnowledgeId}", id);
+            Log.Debug("  - Resumen length: {ResumenLength} caracteres", resumen.Length);
+            Log.Debug("  - Content length: {ContentLength} caracteres", content.Length);
+            
+            var result = await _sender.Send(new UpdateKnowledgeCommand(id, resumen, content));
+            
+            Log.Information("KnowledgeTools.UpdateKnowledgeById: Entrada actualizada exitosamente");
+            return result;
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "KnowledgeTools.UpdateKnowledgeById: Error al actualizar entrada con ID {KnowledgeId}", id);
+            throw;
+        }
+    }
+
+    [McpServerTool, Description("Tool to regenerate all embeddings for knowledge entries (useful when changing chunk size or embedding parameters)")]
+    public async Task<string> RegenerateAllEmbeddings()
+    {
+        try
+        {
+            Log.Information("KnowledgeTools.RegenerateAllEmbeddings: Iniciando regeneración de todos los embeddings...");
+            
+            await _knowledgeRepository.RegenerateAllEmbeddingsAsync();
+            
+            Log.Information("KnowledgeTools.RegenerateAllEmbeddings: ✅ Regeneración completada exitosamente");
+            return "All embeddings have been regenerated successfully!";
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "KnowledgeTools.RegenerateAllEmbeddings: Error al regenerar embeddings");
+            throw;
+        }
     }
 }

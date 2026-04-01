@@ -1,28 +1,164 @@
+using ElBruno.LocalEmbeddings;
+using ElBruno.LocalEmbeddings.Options;
 using Microsoft.EntityFrameworkCore;
+using morla.domain.services;
 using Morla.Domain.Models;
 using Morla.Domain.Repository;
 using Morla.Infrastructure.Database;
+using System.Globalization;
+using System.Text;
 
 namespace morla.infrastructure.repositories;
 
 public class KnowledgeRepository : IKnowledgeRepository
 {
     private readonly MorlaContext _context;
+    private LocalEmbeddingGenerator? _embeddingGenerator;
+    private bool _embeddingGeneratorInitialized = false;
+
+    private int split_in_chunks = 100;
 
     public KnowledgeRepository(MorlaContext context)
     {
         _context = context;
     }
 
-    public async Task AddKnowledgeAsync(Knowledge knowledge)
+    /// <summary>
+    /// Lazy initialization del embedding generator
+    /// </summary>
+    private LocalEmbeddingGenerator GetEmbeddingGenerator()
     {
-        _context.Knowledges.Add(knowledge);
-        await _context.SaveChangesAsync();
+        if (_embeddingGeneratorInitialized && _embeddingGenerator != null)
+            return _embeddingGenerator;
+
+        try
+        {
+            var folderPath = Path.Combine(AppContext.BaseDirectory, "models");
+            var filePath = Path.Combine(folderPath, "model.onnx");
+            
+            if (!Directory.Exists(folderPath))
+            {
+                Serilog.Log.Warning("KnowledgeRepository.GetEmbeddingGenerator: Carpeta de modelos no existe en {Path}", folderPath);
+            }
+
+            var _options = new LocalEmbeddingsOptions
+            {
+                ModelPath = filePath,
+                
+              
+            };
+            _embeddingGenerator = new LocalEmbeddingGenerator(_options);
+            _embeddingGeneratorInitialized = true;
+            
+            Serilog.Log.Information("KnowledgeRepository.GetEmbeddingGenerator: LocalEmbeddingGenerator inicializado correctamente");
+            return _embeddingGenerator;
+        }
+        catch (Exception ex)
+        {
+            Serilog.Log.Error(ex, "KnowledgeRepository.GetEmbeddingGenerator: Error inicializando LocalEmbeddingGenerator");
+            throw;
+        }
     }
 
-    public async Task<Knowledge?> GetByIdAsync(string id)
+public async Task AddKnowledgeAsync(Knowledge knowledge)
+{
+    try
     {
-        return await _context.Knowledges.FirstOrDefaultAsync(k => k.Id == id);
+        if (string.IsNullOrEmpty(knowledge.RowId))
+            knowledge.RowId = TrackingKeyHelper.GenerateTrackingKey(knowledge.Topic, knowledge.Project, knowledge.Title);
+
+        _context.Knowledges.Add(knowledge);
+        await _context.SaveChangesAsync();
+
+        // 🟢 USAMOS TEXTO ORIGINAL (BGE prefiere acentos y ñ)
+        string fullText = $"{knowledge.Title} {knowledge.Summary} {knowledge.Content}";
+        
+        // Solo pasamos a minúsculas, NO normalizamos acentos para el vector
+        var textForEmbedding = fullText.ToLowerInvariant();
+
+        var chunks = SplitIntoChunks(textForEmbedding, split_in_chunks);
+
+        // Limpiar embeddings previos... (tu código de DELETE está bien)
+        // ...
+
+        foreach (var chunk in chunks)
+        {
+            // 🟢 Generar con el chunk "rico" en info
+            var embedding = await GetEmbeddingGenerator().GenerateEmbeddingAsync(chunk);
+            
+            var vector = embedding.Vector.Span.ToArray();
+            
+            // Normalización L2 (opcional si el modelo ya lo da, pero no estorba)
+            var norm = Math.Sqrt(vector.Sum(x => x * x));
+            if (norm == 0) norm = 1;
+            var normalized = vector.Select(x => x / (float)norm).ToArray();
+
+            var blob = new byte[normalized.Length * sizeof(float)];
+            Buffer.BlockCopy(normalized, 0, blob, 0, blob.Length);
+
+            using var cmd = _context.Database.GetDbConnection().CreateCommand();
+            cmd.CommandText = "INSERT INTO knowledges_embedding (rowid, embedding) VALUES ($rowid, $embedding)";
+            cmd.Parameters.Add(new Microsoft.Data.Sqlite.SqliteParameter("$rowid", knowledge.Id));
+            cmd.Parameters.Add(new Microsoft.Data.Sqlite.SqliteParameter("$embedding", blob));
+
+            if (cmd.Connection.State != System.Data.ConnectionState.Open)
+                await cmd.Connection.OpenAsync();
+
+            await cmd.ExecuteNonQueryAsync();
+        }
+    }
+    catch (Exception ex)
+    {
+        Serilog.Log.Error(ex, "KnowledgeRepository.AddKnowledgeAsync: Error");
+        throw;
+    }
+}
+
+// Método auxiliar
+private List<string> SplitIntoChunks(string text, int tokensPerChunk = 50)
+{
+    var words = text.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+    var chunks = new List<string>();
+
+    for (int i = 0; i < words.Length; i += tokensPerChunk)
+    {
+        var chunk = string.Join(" ", words.Skip(i).Take(tokensPerChunk));
+        if (!string.IsNullOrWhiteSpace(chunk))
+            chunks.Add(chunk);
+    }
+    return chunks;
+}
+
+/// <summary>
+/// Normaliza texto removiendo acentos y caracteres especiales
+/// </summary>
+private static string NormalizeText(string text)
+{
+    if (string.IsNullOrEmpty(text))
+        return text;
+
+    // Normalizar a NFD (descomposición) para separar acentos
+    string nfdForm = text.Normalize(NormalizationForm.FormD);
+    var sb = new StringBuilder();
+
+    foreach (char c in nfdForm)
+    {
+        UnicodeCategory unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(c);
+        
+        // Mantener solo caracteres ASCII, números, espacios y guiones
+        if (unicodeCategory != UnicodeCategory.NonSpacingMark &&
+            (char.IsLetterOrDigit(c) || c == ' ' || c == '-' || c == '_' || c == '.'))
+        {
+            sb.Append(c);
+        }
+    }
+
+    return sb.ToString().Normalize(NormalizationForm.FormC);
+}
+
+    public async Task<Knowledge?> GetByIdAsync(string rowId)
+    {
+        return await _context.Knowledges.FirstOrDefaultAsync(k => k.RowId == rowId);  // ✅ Busca por RowId
     }
 
     public async Task<List<Knowledge>> GetAllAsync()
@@ -30,15 +166,88 @@ public class KnowledgeRepository : IKnowledgeRepository
         return await _context.Knowledges.ToListAsync();
     }
 
-    public async Task UpdateAsync(Knowledge knowledge)
+public async Task UpdateAsync(Knowledge knowledge)
+{
+    try
     {
-        _context.Knowledges.Update(knowledge);
-        await _context.SaveChangesAsync();
-    }
+        var existingKnowledge = await _context.Knowledges
+            .FirstOrDefaultAsync(k => k.RowId == knowledge.RowId);
 
-    public async Task DeleteAsync(string id)
+        if (existingKnowledge == null)
+            throw new InvalidOperationException($"Knowledge with RowId '{knowledge.RowId}' not found");
+
+        // 1. Actualizar los campos en la tabla principal
+        existingKnowledge.Summary = knowledge.Summary;
+        existingKnowledge.Content = knowledge.Content;
+        existingKnowledge.Title = knowledge.Title;
+        existingKnowledge.Topic = knowledge.Topic;
+        existingKnowledge.Project = knowledge.Project;
+
+        _context.Knowledges.Update(existingKnowledge);
+        await _context.SaveChangesAsync();
+
+        // 2. Preparar el texto para los nuevos Embeddings
+        // 🟢 CAMBIO: Usamos el texto original. BGE prefiere acentos y mayúsculas/minúsculas naturales.
+        string fullText = $"{existingKnowledge.Title} {existingKnowledge.Summary} {existingKnowledge.Content}";
+        
+        // Solo pasamos a minúsculas por estandarización, pero NO quitamos acentos.
+        var textForEmbedding = fullText.ToLowerInvariant();
+
+        // 3. Dividir en chunks
+        var chunks = SplitIntoChunks(textForEmbedding, split_in_chunks);
+
+        // 4. Limpiar embeddings antiguos (esto está perfecto en tu código)
+        using (var delCmd = _context.Database.GetDbConnection().CreateCommand())
+        {
+            delCmd.CommandText = "DELETE FROM knowledges_embedding WHERE rowid = $rowid";
+            delCmd.Parameters.Add(new Microsoft.Data.Sqlite.SqliteParameter("$rowid", existingKnowledge.Id));
+            
+            if (delCmd.Connection.State != System.Data.ConnectionState.Open)
+                await delCmd.Connection.OpenAsync();
+            
+            await delCmd.ExecuteNonQueryAsync();
+        }
+
+        // 5. Insertar los nuevos vectores de BGE
+        foreach (var chunk in chunks)
+        {
+            // Generar el embedding con el nuevo modelo cargado en el constructor
+            var embedding = await GetEmbeddingGenerator().GenerateEmbeddingAsync(chunk);
+            
+            var vector = embedding.Vector.Span.ToArray();
+            
+            // Normalización L2 (asegura que el vector tenga longitud 1)
+            var norm = Math.Sqrt(vector.Sum(x => x * x));
+            if (norm == 0) norm = 1;
+            var normalized = vector.Select(x => x / (float)norm).ToArray();
+
+            var blob = new byte[normalized.Length * sizeof(float)];
+            Buffer.BlockCopy(normalized, 0, blob, 0, blob.Length);
+
+            using var cmd = _context.Database.GetDbConnection().CreateCommand();
+            cmd.CommandText = "INSERT INTO knowledges_embedding (rowid, embedding) VALUES ($rowid, $embedding)";
+            
+            cmd.Parameters.Add(new Microsoft.Data.Sqlite.SqliteParameter("$rowid", existingKnowledge.Id));
+            cmd.Parameters.Add(new Microsoft.Data.Sqlite.SqliteParameter("$embedding", blob));
+
+            if (cmd.Connection.State != System.Data.ConnectionState.Open)
+                await cmd.Connection.OpenAsync();
+
+            await cmd.ExecuteNonQueryAsync();
+        }
+
+        Serilog.Log.Information("KnowledgeRepository.UpdateAsync: Knowledge {RowId} actualizado con BGE-Small", knowledge.RowId);
+    }
+    catch (Exception ex)
     {
-        var knowledge = await GetByIdAsync(id);
+        Serilog.Log.Error(ex, "KnowledgeRepository.UpdateAsync: Error al actualizar {RowId}", knowledge.RowId);
+        throw;
+    }
+}
+
+    public async Task DeleteAsync(string rowId)
+    {
+        var knowledge = await GetByIdAsync(rowId);
         if (knowledge != null)
         {
             _context.Knowledges.Remove(knowledge);
@@ -47,68 +256,250 @@ public class KnowledgeRepository : IKnowledgeRepository
     }
 
     /// <summary>
-    /// Búsqueda semántica usando FTS5 (Full Text Search)
-    /// Busca en los campos: Title, Summary, Content, Topic
-    /// Si FTS5 no está disponible, cae a búsqueda regular LIKE
+    /// Regenera todos los embeddings existentes (útil cuando cambias tamaño de chunks)
     /// </summary>
-    /// <param name="searchTerm">Término de búsqueda (soporta operadores FTS5: AND, OR, "frase exacta", etc.)</param>
-    /// <returns>Lista de Knowledge que coinciden con la búsqueda</returns>
-    public async Task<List<Knowledge>> SearchAsync(string searchTerm)
+    public async Task RegenerateAllEmbeddingsAsync()
     {
-        if (string.IsNullOrWhiteSpace(searchTerm))
-            return await GetAllAsync();
-
         try
         {
-            // Sanitizar el término de búsqueda para FTS5
-            var sanitizedTerm = SanitizeFtsQuery(searchTerm);
+            Serilog.Log.Information("KnowledgeRepository.RegenerateAllEmbeddingsAsync: Iniciando regeneración de todos los embeddings...");
+            
+            var allKnowledges = await _context.Knowledges.ToListAsync();
+            Serilog.Log.Information("KnowledgeRepository.RegenerateAllEmbeddingsAsync: Encontrados {Count} documentos", allKnowledges.Count);
 
-            // Usar FormattableString para que EF Core interprete correctamente la sentencia SQL
-            // Especificar explícitamente todas las columnas de Knowledges
-            var results = await _context.Knowledges
-                .FromSqlInterpolated($@"
-                    SELECT k.Id, k.Topic, k.Title, k.Project, k.Summary, k.Content, k.UpdatedAt, k.CreatedAt
-                    FROM Knowledges k 
-                    INNER JOIN Knowledges_fts f ON k.rowid = f.rowid 
-                    WHERE f MATCH {sanitizedTerm}
-                    ORDER BY rank")
-                .ToListAsync();
+            // ✅ Borrar todos los embeddings
+            using (var delCmd = _context.Database.GetDbConnection().CreateCommand())
+            {
+                delCmd.CommandText = "DELETE FROM knowledges_embedding";
+                
+                if (delCmd.Connection.State != System.Data.ConnectionState.Open)
+                    await delCmd.Connection.OpenAsync();
+                
+                await delCmd.ExecuteNonQueryAsync();
+            }
+            Serilog.Log.Information("KnowledgeRepository.RegenerateAllEmbeddingsAsync: Embeddings borrados");
 
-            return results;
+            var generator = GetEmbeddingGenerator();
+            int processedCount = 0;
+
+            // ✅ Regenerar embeddings para cada documento
+            foreach (var knowledge in allKnowledges)
+            {
+                try
+                {
+                    string fullText = $"{knowledge.Title} {knowledge.Summary} {knowledge.Content}";
+                    var textForEmbedding = fullText.ToLowerInvariant();
+
+                    var chunks = SplitIntoChunks(textForEmbedding, split_in_chunks);
+
+                    // Insertar embeddings por chunk
+                    foreach (var chunk in chunks)
+                    {
+                        var embedding = await generator.GenerateEmbeddingAsync(chunk);
+                        
+                        var vector = embedding.Vector.Span.ToArray();
+                        var norm = Math.Sqrt(vector.Sum(x => x * x));
+                        if (norm == 0) norm = 1;
+                        var normalized = vector.Select(x => x / (float)norm).ToArray();
+
+                        var blob = new byte[normalized.Length * sizeof(float)];
+                        Buffer.BlockCopy(normalized, 0, blob, 0, blob.Length);
+
+                        using var cmd = _context.Database.GetDbConnection().CreateCommand();
+                        cmd.CommandText = "INSERT INTO knowledges_embedding (rowid, embedding) VALUES ($rowid, $embedding)";
+                        
+                        cmd.Parameters.Add(new Microsoft.Data.Sqlite.SqliteParameter("$rowid", knowledge.Id));
+                        cmd.Parameters.Add(new Microsoft.Data.Sqlite.SqliteParameter("$embedding", blob));
+
+                        if (cmd.Connection.State != System.Data.ConnectionState.Open)
+                            await cmd.Connection.OpenAsync();
+
+                        await cmd.ExecuteNonQueryAsync();
+                    }
+
+                    processedCount++;
+                    if (processedCount % 10 == 0)
+                        Serilog.Log.Information("KnowledgeRepository.RegenerateAllEmbeddingsAsync: Procesados {Count}/{Total}", processedCount, allKnowledges.Count);
+                }
+                catch (Exception ex)
+                {
+                    Serilog.Log.Error(ex, "KnowledgeRepository.RegenerateAllEmbeddingsAsync: Error regenerando embeddings para {RowId}", knowledge.RowId);
+                }
+            }
+
+            Serilog.Log.Information("KnowledgeRepository.RegenerateAllEmbeddingsAsync: ✅ Regeneración completada. Procesados {Count}/{Total}", processedCount, allKnowledges.Count);
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"FTS5 search failed: {ex.Message}. Falling back to LIKE search.");
-            
-            // Fallback: Búsqueda regular con LIKE si FTS5 falla
-            return await FallbackSearchAsync(searchTerm);
+            Serilog.Log.Error(ex, "KnowledgeRepository.RegenerateAllEmbeddingsAsync: Error fatal");
+            throw;
         }
     }
 
+      
     /// <summary>
-    /// Búsqueda alternativa usando LIKE en caso de que FTS5 no esté disponible
+    /// Extrae palabras clave de búsqueda, removiendo stop words comunes
     /// </summary>
-    private async Task<List<Knowledge>> FallbackSearchAsync(string searchTerm)
+    private static List<string> ExtractSearchWords(string searchTerm)
     {
-        var likePattern = $"%{searchTerm}%";
+        // ✅ Normalizar término de búsqueda y convertir a minúsculas
+        searchTerm = NormalizeText(searchTerm).ToLowerInvariant();
         
-        return await _context.Knowledges
-            .Where(k => EF.Functions.Like(k.Title, likePattern) ||
-                        EF.Functions.Like(k.Summary, likePattern) ||
-                        EF.Functions.Like(k.Content, likePattern) ||
-                        EF.Functions.Like(k.Topic, likePattern))
-            .ToListAsync();
+        var stopWords = new[] { "the", "a", "an", "and", "or", "but", "in", "on", "at", "to", "for", "de", "la", "el" };
+        
+        return searchTerm
+            .ToLowerInvariant()
+            .Split(new[] { ' ', ',', '.', '-', '_' }, StringSplitOptions.RemoveEmptyEntries)
+            .Where(word => word.Length > 2 && !stopWords.Contains(word))  // Palabras > 2 caracteres
+            .Distinct()
+            .ToList();
     }
 
-    /// <summary>
-    /// Sanitiza un término de búsqueda para FTS5
-    /// Envuelve cada palabra en comillas para evitar errores con caracteres especiales
-    /// </summary>
-    private static string SanitizeFtsQuery(string query)
+
+async Task<List<(Knowledge Knowledge, int Score)>> IKnowledgeRepository.SearchAsync(string? searchTerm, string? topic, string? project)
+{
+    try
     {
-        // Dividir por espacios y envolver cada palabra en comillas
-        var terms = query.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-        var sanitized = string.Join(" AND ", terms.Select(t => $"\"{t}\""));
-        return sanitized;
+        Serilog.Log.Information("KnowledgeRepository.SearchAsync: Iniciando búsqueda híbrida (BGE-Small + Keywords)...");
+
+        if (string.IsNullOrWhiteSpace(searchTerm))
+        {
+            var simpleResults = await _context.Knowledges
+                .Where(k => (string.IsNullOrEmpty(topic) || k.Topic == topic) &&
+                            (string.IsNullOrEmpty(project) || k.Project == project))
+                .ToListAsync();
+            return simpleResults.Select(k => (k, 100)).ToList();
+        }
+
+        var allKnowledges = await _context.Knowledges.ToListAsync();
+        var results = new List<(Knowledge, int)>();
+
+        // 1️⃣ BÚSQUEDA VECTORIAL (BGE-Small-v1.5)
+        Serilog.Log.Information("KnowledgeRepository.SearchAsync: Ejecutando búsqueda vectorial...");
+        try
+        {
+            // ✅ CAMBIO: BGE requiere este prefijo exacto para las consultas
+            var queryPrefix = "represent query for retrieval: ";
+            
+            // ✅ CAMBIO: No usamos NormalizeText para el vector, el modelo entiende acentos.
+            // Solo pasamos a minúsculas para consistencia.
+            var textToEmbed = queryPrefix + searchTerm.ToLowerInvariant();
+            
+            var searchEmbedding = await GetEmbeddingGenerator().GenerateEmbeddingAsync(textToEmbed);
+            var searchVector = searchEmbedding.Vector.Span.ToArray();
+            
+            // Normalizar vector de búsqueda
+            var norm = Math.Sqrt(searchVector.Sum(x => x * x));
+            if (norm > 0)
+                searchVector = searchVector.Select(x => x / (float)norm).ToArray();
+
+            var vectorScores = new Dictionary<long, int>();
+
+            using var connection = _context.Database.GetDbConnection();
+            if (connection.State != System.Data.ConnectionState.Open)
+                await connection.OpenAsync();
+
+            using var command = connection.CreateCommand();
+            // id es el PK de la tabla de embeddings, rowid es el FK hacia Knowledge.Id
+            command.CommandText = "SELECT rowid, embedding FROM knowledges_embedding";
+
+            using var reader = await command.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                var knowledgeId = reader.GetInt64(0); 
+                var embeddingBlob = (byte[])reader.GetValue(1);
+
+                var embeddingFloats = new float[embeddingBlob.Length / sizeof(float)];
+                Buffer.BlockCopy(embeddingBlob, 0, embeddingFloats, 0, embeddingBlob.Length);
+
+                // Similitud coseno
+                float similarity = 0;
+                if (searchVector.Length == embeddingFloats.Length)
+                {
+                    for (int i = 0; i < searchVector.Length; i++)
+                        similarity += searchVector[i] * embeddingFloats[i];
+                }
+
+                int vectorScore = (int)(similarity * 100);
+
+                if (!vectorScores.ContainsKey(knowledgeId) || vectorScores[knowledgeId] < vectorScore)
+                    vectorScores[knowledgeId] = vectorScore;
+            }
+
+            // ✅ CAMBIO: Umbral ajustado a 65 para BGE (55 era demasiado restrictivo para modelos locales)
+            const int MIN_VECTOR_SCORE = 65; 
+            
+            var topVectorMatches = vectorScores
+                .Where(kvp => kvp.Value >= MIN_VECTOR_SCORE)
+                .OrderByDescending(kvp => kvp.Value)
+                .Take(15) // Limitamos a los mejores matches semánticos
+                .ToList();
+
+            if (topVectorMatches.Any())
+            {
+                results = topVectorMatches
+                    .Select(kvp => (allKnowledges.FirstOrDefault(k => k.Id == kvp.Key), kvp.Value))
+                    .Where(x => x.Item1 != null &&
+                               (string.IsNullOrEmpty(topic) || x.Item1.Topic == topic) &&
+                               (string.IsNullOrEmpty(project) || x.Item1.Project == project))
+                    .Select(x => (x.Item1!, x.Item2))
+                    .ToList();
+
+                if (results.Any())
+                {
+                    Serilog.Log.Information("KnowledgeRepository.SearchAsync: ✅ BÚSQUEDA VECTORIAL EXITOSA ({Count} resultados)", results.Count);
+                    return results;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Serilog.Log.Warning(ex, "KnowledgeRepository.SearchAsync: Falló búsqueda vectorial, intentando keywords...");
+        }
+
+        // 2️⃣ FALLBACK - BÚSQUEDA POR KEYWORDS (Se mantiene tu lógica original de normalización)
+        Serilog.Log.Information("KnowledgeRepository.SearchAsync: Ejecutando fallback de palabras clave...");
+        var searchWords = ExtractSearchWords(searchTerm).ToList();
+
+        if (searchWords.Any())
+        {
+            foreach (var knowledge in allKnowledges)
+            {
+                if (!(string.IsNullOrEmpty(topic) || knowledge.Topic == topic) ||
+                    !(string.IsNullOrEmpty(project) || knowledge.Project == project))
+                    continue;
+
+                int score = 0;
+                int wordsFound = 0;
+                
+                var normalizedTitle = NormalizeText(knowledge.Title).ToLowerInvariant();
+                var normalizedSummary = NormalizeText(knowledge.Summary).ToLowerInvariant();
+                var normalizedContent = NormalizeText(knowledge.Content).ToLowerInvariant();
+
+                foreach (var word in searchWords)
+                {
+                    bool foundInDoc = false;
+                    if (normalizedTitle.Contains(word)) { score += 50; foundInDoc = true; }
+                    if (normalizedSummary.Contains(word)) { score += 30; foundInDoc = true; }
+                    if (normalizedContent.Contains(word)) { score += 15; foundInDoc = true; }
+                    
+                    if (foundInDoc) wordsFound++;
+                }
+                
+                bool hasWordInTitleOrSummary = searchWords.Any(w => normalizedTitle.Contains(w) || normalizedSummary.Contains(w));
+                int minWordsRequired = searchWords.Count >= 3 ? (int)Math.Ceiling(searchWords.Count * 0.6) : 1;
+                
+                if (hasWordInTitleOrSummary && wordsFound >= minWordsRequired)
+                    results.Add((knowledge, score));
+            }
+        }
+
+        return results.OrderByDescending(x => x.Item2).ToList();
     }
+    catch (Exception ex)
+    {
+        Serilog.Log.Error(ex, "KnowledgeRepository.SearchAsync: Error crítico");
+        throw;
+    }
+}
 }

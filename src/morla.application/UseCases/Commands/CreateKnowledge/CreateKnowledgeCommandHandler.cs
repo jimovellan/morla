@@ -1,6 +1,8 @@
 using MediatR;
+using morla.domain.services;
 using Morla.Domain.Models;
 using Morla.Domain.Repository;
+using Serilog;
 
 namespace Morla.Application.UseCases.Commands.CreateKnowledge;
 
@@ -15,19 +17,34 @@ public class CreateKnowledgeCommandHandler : IRequestHandler<CreateKnowledgeComm
 
     public async Task<string> Handle(CreateKnowledgeCommand request, CancellationToken cancellationToken)
     {
-        var knowledge = new Knowledge
+        try
         {
-            Id = Guid.NewGuid().ToString(),
-            Topic = request.Topic,
-            Title = request.Title,
-            Project = request.Project,
-            Summary = request.Summary,
-            Content = request.Content,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
-        };
+            Log.Information("CreateKnowledgeCommandHandler.Handle: Procesando comando...");
+            Log.Debug("  - Topic: {Topic}, Title: {Title}, Project: {Project}", request.Topic, request.Title, request.Project);
+            
+            var knowledge = new Knowledge
+            {
+                // Id se genera automáticamente en la BD (AUTOINCREMENT)
+                RowId = TrackingKeyHelper.GenerateTrackingKey(request.Topic,request.Project,request.Title),
+                Topic = request.Topic,
+                Title = request.Title,
+                Project = request.Project,
+                Summary = request.Summary,
+                Content = request.Content,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
 
-        await _knowledgeRepository.AddKnowledgeAsync(knowledge);
-        return $"Knowledge entry created successfully with ID: {knowledge.Id}";
+            Log.Information("CreateKnowledgeCommandHandler.Handle: Guardando en repositorio...");
+            await _knowledgeRepository.AddKnowledgeAsync(knowledge);
+            
+            Log.Information("CreateKnowledgeCommandHandler.Handle: Entrada creada con ID (long): {KnowledgeId}, RowId: {RowId}", knowledge.Id, knowledge.RowId);
+            return $"Knowledge entry created successfully with ID: {knowledge.Id}, RowId: {knowledge.RowId}";
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "CreateKnowledgeCommandHandler.Handle: Error al crear entrada");
+            throw;
+        }
     }
 }
