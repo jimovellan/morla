@@ -2,6 +2,40 @@
 
 # Morla
 
+## 🚀 Inicio Rápido
+
+### 1. Instalar Morla
+```bash
+dotnet build
+dotnet publish -c Release
+# Luego agregar el ejecutable a tu PATH
+```
+
+### 2. Configurar MCP (Obligatorio)
+```bash
+morla setup
+```
+
+Este comando configura automáticamente:
+- ✅ **Copilot CLI**: Lee instrucciones en `~/.copilot/memory.instructions.md`
+- ✅ **GitHub Copilot (VSCode)**: MCP disponible en `~/.vscode/mcp.json`
+- ✅ **Configuración centralizada**: Backup en `~/.config/morla/`
+
+**Después de ejecutar `morla setup`:**
+1. Reinicia VSCode para cargar el MCP
+2. Inicia una nueva sesión de Copilot CLI
+3. Ejecuta el servidor MCP: `morla mcp`
+
+### 3. Usar Morla
+```bash
+morla mcp        # Inicia servidor MCP (puerto 6277)
+morla server     # Inicia API HTTP (puerto 5000)
+morla setup      # Configura archivos globales
+morla help       # Ver ayuda
+```
+
+---
+
 #Arquitectura
 ```
                           ┌─────────────────────────┐

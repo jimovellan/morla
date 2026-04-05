@@ -1,0 +1,9 @@
+{
+    "servers": {
+        "morla": {
+            "command": "morla",
+            "args": ["mcp"],
+            "env": {}
+        }
+    }
+}

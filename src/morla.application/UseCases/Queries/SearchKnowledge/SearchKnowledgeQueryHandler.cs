@@ -18,10 +18,10 @@ public class SearchKnowledgeQueryHandler : IRequestHandler<SearchKnowledgeQuery,
         try
         {
             Log.Information("SearchKnowledgeQueryHandler.Handle: Iniciando búsqueda...");
-            Log.Debug("  - SearchTerm: {SearchTerm}, Topic: {Topic}, Project: {Project}", 
-                request.SearchTerm ?? "null", request.Topic ?? "null", request.Project ?? "null");
+            Log.Debug("  - SearchTerm: {SearchTerm}, Topic: {Topic}, Project: {Project}, Limit: {Limit}", 
+                request.SearchTerm ?? "null", request.Topic ?? "null", request.Project ?? "null", request.Limit);
             
-            var results = await _knowledgeRepository.SearchAsync(request.SearchTerm, request.Topic, request.Project);
+            var results = await _knowledgeRepository.SearchAsync(request.SearchTerm, request.Topic, request.Project, request.Limit);
             
             var dtos = results
                 .OrderByDescending(x => x.Score)

@@ -10,7 +10,7 @@
     <!-- nombre del comando -->
     <ToolCommandName>morla</ToolCommandName>
     <PackageId>Morla</PackageId>
-    <Version>0.0.4</Version>
+    <Version>0.0.8</Version>
     <Authors>Jim</Authors>
   </PropertyGroup>
 <ItemGroup>
@@ -24,8 +24,10 @@
   <None Include="..\..\extensions\*.dylib">
     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
   </None>
-  <None Include="..\..\models\**\*">
-    <Link>models\%(RecursiveDir)%(FileName)%(Extension)</Link>
+  <None Include="..\..\models\*">
+    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+  </None>
+  <None Include="setup-files\**\*">
     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
   </None>
 </ItemGroup>

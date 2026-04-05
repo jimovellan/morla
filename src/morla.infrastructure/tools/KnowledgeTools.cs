@@ -6,6 +6,8 @@ using Morla.Application.UseCases.Commands.CreateKnowledge;
 using Morla.Application.UseCases.Commands.UpdateKnowledge;
 using Morla.Application.UseCases.Queries.SearchKnowledge;
 using Morla.Application.UseCases.Queries.GetKnowledgeById;
+using Morla.Application.UseCases.Queries.GetLastSession;
+using Morla.Application.UseCases.Queries.GetLatestSessions;
 using Morla.Domain.Models;
 using Morla.Domain.Repository;
 using Serilog;
@@ -31,20 +33,7 @@ public class KnowledgeTools
         {
             Log.Information("KnowledgeTools.SetKnowledge: Iniciando creación de entrada...");
             Log.Debug("  - Topic: {Topic}, Title: {Title}, Project: {Project}", topic, title, project);
-            
-            var knowledge = new Knowledge
-            {
-                // Id se genera automáticamente en la BD (AUTOINCREMENT)
-                RowId = Guid.NewGuid().ToString(),  // ✅ GUID para referencia externa
-                Topic = topic,
-                Title = title,
-                Project = project,
-                Summary = summary,
-                Content = content,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            };
-            
+                        
             Log.Information("KnowledgeTools.SetKnowledge: Enviando comando CreateKnowledge...");
             var result = await _sender.Send(new CreateKnowledgeCommand(topic, title, project, summary, content));
 
@@ -59,14 +48,14 @@ public class KnowledgeTools
     }
 
     [McpServerTool, Description("Tool to search knowledge entries with flexible filtering by search term, topic, and/or project")]
-    public async Task<List<SearchKnowledgeDto>> SearchKnowledge(string? searchTerm = null, string? topic = null, string? project = null)
+    public async Task<List<SearchKnowledgeDto>> SearchKnowledge(string? searchTerm = null, string? topic = null, string? project = null, int limit = 5)
     {
         try
         {
             Log.Information("KnowledgeTools.SearchKnowledge: Iniciando búsqueda...");
-            Log.Debug("  - SearchTerm: {SearchTerm}, Topic: {Topic}, Project: {Project}", searchTerm ?? "null", topic ?? "null", project ?? "null");
+            Log.Debug("  - SearchTerm: {SearchTerm}, Topic: {Topic}, Project: {Project}, Limit: {Limit}", searchTerm ?? "null", topic ?? "null", project ?? "null", limit);
             
-            var result = await _sender.Send(new SearchKnowledgeQuery(searchTerm, topic, project));
+            var result = await _sender.Send(new SearchKnowledgeQuery(searchTerm, topic, project, limit));
             
             Log.Information("KnowledgeTools.SearchKnowledge: Búsqueda completada. Resultados encontrados: {ResultCount}", result.Count);
             return result;
@@ -133,6 +122,52 @@ public class KnowledgeTools
         catch (Exception ex)
         {
             Log.Error(ex, "KnowledgeTools.RegenerateAllEmbeddings: Error al regenerar embeddings");
+            throw;
+        }
+    }
+
+    [McpServerTool, Description("Tool to get the last (most recent) session")]
+    public async Task<GetLastSessionDto?> GetLastSession(string? project = null)
+    {
+        try
+        {
+            Log.Information("KnowledgeTools.GetLastSession: Obteniendo última sesión...");
+            Log.Debug("  - Project: {Project}", project ?? "null");
+            
+            var result = await _sender.Send(new GetLastSessionQuery(project));
+            
+            if (result == null)
+            {
+                Log.Information("KnowledgeTools.GetLastSession: No se encontraron sesiones");
+                return null;
+            }
+            
+            Log.Information("KnowledgeTools.GetLastSession: ✅ Sesión obtenida. RowId: {RowId}", result.RowId);
+            return result;
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "KnowledgeTools.GetLastSession: Error al obtener última sesión");
+            throw;
+        }
+    }
+
+    [McpServerTool, Description("Tool to get the latest sessions ordered by creation date")]
+    public async Task<List<GetLatestSessionDto>> GetLatestSessions(int limit = 3, string? project = null)
+    {
+        try
+        {
+            Log.Information("KnowledgeTools.GetLatestSessions: Obteniendo últimas sesiones...");
+            Log.Debug("  - Limit: {Limit}, Project: {Project}", limit, project ?? "null");
+            
+            var result = await _sender.Send(new GetLatestSessionsQuery(limit, project));
+            
+            Log.Information("KnowledgeTools.GetLatestSessions: ✅ Sesiones obtenidas. Count: {Count}", result.Count);
+            return result;
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "KnowledgeTools.GetLatestSessions: Error al obtener últimas sesiones");
             throw;
         }
     }

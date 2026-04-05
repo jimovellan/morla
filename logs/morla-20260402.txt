@@ -1,0 +1,333 @@
+[2026-04-02 09:22:23] [INF] McpRuntime: Creando host...
+[2026-04-02 09:22:23] [INF] McpRuntime: Agregando servicios de infraestructura...
+[2026-04-02 09:22:23] [INF] AddCoreServices: Iniciando configuración de servicios core...
+[2026-04-02 09:22:23] [INF] AddCoreServices: DbContext configurado
+[2026-04-02 09:22:23] [INF] AddCoreServices: Repositorios registrados
+[2026-04-02 09:22:23] [INF] AddCoreServices: Iniciando migraciones de base de datos...
+[2026-04-02 09:22:23] [INF] VssInterceptor: Abriendo conexión SQLite, intentando cargar vec0...
+[2026-04-02 09:22:23] [INF] VssInterceptor: Archivo vec0 encontrado en /Users/joseignaciomovellan/.dotnet/tools/.store/morla/0.0.5/morla/0.0.5/tools/net10.0/any/vec0.dylib
+[2026-04-02 09:22:23] [INF] VssInterceptor: Habilitando extensiones SQLite...
+[2026-04-02 09:22:23] [INF] VssInterceptor: Cargando extensión vec0...
+[2026-04-02 09:22:23] [INF] VssInterceptor: Extensión vec0 cargada exitosamente
+[2026-04-02 09:22:23] [INF] VssInterceptor: Abriendo conexión SQLite, intentando cargar vec0...
+[2026-04-02 09:22:23] [INF] VssInterceptor: Archivo vec0 encontrado en /Users/joseignaciomovellan/.dotnet/tools/.store/morla/0.0.5/morla/0.0.5/tools/net10.0/any/vec0.dylib
+[2026-04-02 09:22:23] [INF] VssInterceptor: Habilitando extensiones SQLite...
+[2026-04-02 09:22:23] [INF] VssInterceptor: Cargando extensión vec0...
+[2026-04-02 09:22:23] [INF] VssInterceptor: Extensión vec0 cargada exitosamente
+[2026-04-02 09:22:23] [INF] VssInterceptor: Abriendo conexión SQLite, intentando cargar vec0...
+[2026-04-02 09:22:23] [INF] VssInterceptor: Archivo vec0 encontrado en /Users/joseignaciomovellan/.dotnet/tools/.store/morla/0.0.5/morla/0.0.5/tools/net10.0/any/vec0.dylib
+[2026-04-02 09:22:23] [INF] VssInterceptor: Habilitando extensiones SQLite...
+[2026-04-02 09:22:23] [INF] VssInterceptor: Cargando extensión vec0...
+[2026-04-02 09:22:23] [INF] VssInterceptor: Extensión vec0 cargada exitosamente
+[2026-04-02 09:22:23] [INF] AddCoreServices: Migraciones completadas exitosamente
+[2026-04-02 09:22:23] [INF] AddCoreServices: Servicios core configurados correctamente
+[2026-04-02 09:22:23] [INF] McpRuntime: Configurando servidor MCP...
+[2026-04-02 09:22:23] [INF] McpRuntime: Compilando host...
+[2026-04-02 09:22:23] [INF] McpRuntime: Iniciando host...
+[2026-04-02 09:22:23] [DBG] Hosting starting
+[2026-04-02 09:22:23] [INF] Server (stream) (morla.hosts) transport reading messages.
+[2026-04-02 09:22:23] [DBG] Server (stream) (morla.hosts) transport received message with ID '1'.
+[2026-04-02 09:22:23] [INF] Application started. Press Ctrl+C to shut down.
+[2026-04-02 09:22:23] [INF] Hosting environment: Production
+[2026-04-02 09:22:23] [INF] Content root path: /Users/joseignaciomovellan/develop/dotnet/morla
+[2026-04-02 09:22:23] [DBG] Hosting started
+[2026-04-02 09:22:23] [DBG] Server (morla.hosts 0.0.5.0) read JsonRpcRequest message from channel.
+[2026-04-02 09:22:23] [INF] Server (morla.hosts 0.0.5.0) method 'initialize' request handler called.
+[2026-04-02 09:22:23] [DBG] Server (morla.hosts 0.0.5.0), Client (Visual Studio Code 1.111.0) sending message.
+[2026-04-02 09:22:23] [DBG] Server (stream) (morla.hosts) transport received message with ID '2'.
+[2026-04-02 09:22:23] [DBG] Server (stream) (morla.hosts) transport received message with ID '(no id)'.
+[2026-04-02 09:22:23] [DBG] Server (stream) (morla.hosts) transport received message with ID '3'.
+[2026-04-02 09:22:23] [DBG] Server (morla.hosts 0.0.5.0), Client (Visual Studio Code 1.111.0) read JsonRpcRequest message from channel.
+[2026-04-02 09:22:23] [INF] Server (morla.hosts 0.0.5.0), Client (Visual Studio Code 1.111.0) method 'logging/setLevel' request handler called.
+[2026-04-02 09:22:23] [DBG] Server (morla.hosts 0.0.5.0), Client (Visual Studio Code 1.111.0) read JsonRpcNotification message from channel.
+[2026-04-02 09:22:23] [DBG] Server (morla.hosts 0.0.5.0), Client (Visual Studio Code 1.111.0) read JsonRpcRequest message from channel.
+[2026-04-02 09:22:23] [INF] Server (morla.hosts 0.0.5.0), Client (Visual Studio Code 1.111.0) method 'tools/list' request handler called.
+[2026-04-02 09:22:23] [DBG] Server (stream) (morla.hosts) transport received message with ID '4'.
+[2026-04-02 09:22:23] [DBG] Server (morla.hosts 0.0.5.0), Client (Visual Studio Code 1.111.0) read JsonRpcRequest message from channel.
+[2026-04-02 09:22:23] [INF] Server (morla.hosts 0.0.5.0), Client (Visual Studio Code 1.111.0) method 'tools/call' request handler called.
+[2026-04-02 09:22:23] [DBG] Server (morla.hosts 0.0.5.0), Client (Visual Studio Code 1.111.0) sending message.
+[2026-04-02 09:22:23] [DBG] Server (morla.hosts 0.0.5.0), Client (Visual Studio Code 1.111.0) sending message.
+[2026-04-02 09:22:23] [INF] Server (morla.hosts 0.0.5.0), Client (Visual Studio Code 1.111.0) method 'logging/setLevel' request handler completed in 1.9124ms.
+[2026-04-02 09:22:23] [INF] Server (morla.hosts 0.0.5.0), Client (Visual Studio Code 1.111.0) method 'initialize' request handler completed in 7.7399ms.
+[2026-04-02 09:22:23] [INF] Server (morla.hosts 0.0.5.0), Client (Visual Studio Code 1.111.0) method 'tools/list' request handler completed in 3.3724ms.
+[2026-04-02 09:22:23] [INF] KnowledgeTools.SearchKnowledge: Iniciando búsqueda...
+[2026-04-02 09:22:23] [DBG]   - SearchTerm: arquitectura clean architecture patrones diseño, Topic: architecture, Project: null
+[2026-04-02 09:22:23] [INF] SearchKnowledgeQueryHandler.Handle: Iniciando búsqueda...
+[2026-04-02 09:22:23] [DBG]   - SearchTerm: arquitectura clean architecture patrones diseño, Topic: architecture, Project: null
+[2026-04-02 09:22:23] [INF] KnowledgeRepository.SearchAsync: Iniciando búsqueda híbrida (BGE-Small + Keywords)...
+[2026-04-02 09:22:23] [INF] KnowledgeRepository.SearchAsync: Ejecutando búsqueda vectorial...
+[2026-04-02 09:22:24] [INF] KnowledgeRepository.GetEmbeddingGenerator: LocalEmbeddingGenerator inicializado correctamente
+[2026-04-02 09:22:24] [INF] KnowledgeRepository.SearchAsync: Ejecutando fallback de palabras clave...
+[2026-04-02 09:22:24] [INF] SearchKnowledgeQueryHandler.Handle: Búsqueda completada. Resultados: 0
+[2026-04-02 09:22:24] [INF] KnowledgeTools.SearchKnowledge: Búsqueda completada. Resultados encontrados: 0
+[2026-04-02 09:22:24] [INF] "search_knowledge" completed. IsError = false.
+[2026-04-02 09:22:24] [DBG] Server (morla.hosts 0.0.5.0), Client (Visual Studio Code 1.111.0) sending message.
+[2026-04-02 09:22:24] [INF] Server (morla.hosts 0.0.5.0), Client (Visual Studio Code 1.111.0) method 'tools/call' request handler completed in 1106.2637ms.
+[2026-04-02 09:22:46] [DBG] Server (stream) (morla.hosts) transport received message with ID '5'.
+[2026-04-02 09:22:46] [DBG] Server (morla.hosts 0.0.5.0), Client (Visual Studio Code 1.111.0) read JsonRpcRequest message from channel.
+[2026-04-02 09:22:46] [INF] Server (morla.hosts 0.0.5.0), Client (Visual Studio Code 1.111.0) method 'tools/call' request handler called.
+[2026-04-02 09:22:46] [INF] KnowledgeTools.SetKnowledge: Iniciando creación de entrada...
+[2026-04-02 09:22:46] [DBG]   - Topic: architecture, Title: Morla Clean Architecture CQRS, Project: Morla
+[2026-04-02 09:22:46] [INF] KnowledgeTools.SetKnowledge: Enviando comando CreateKnowledge...
+[2026-04-02 09:22:46] [INF] CreateKnowledgeCommandHandler.Handle: Procesando comando...
+[2026-04-02 09:22:46] [DBG]   - Topic: architecture, Title: Morla Clean Architecture CQRS, Project: Morla
+[2026-04-02 09:22:46] [INF] CreateKnowledgeCommandHandler.Handle: Guardando en repositorio...
+[2026-04-02 09:22:46] [INF] KnowledgeRepository.GetEmbeddingGenerator: LocalEmbeddingGenerator inicializado correctamente
+[2026-04-02 09:22:47] [INF] CreateKnowledgeCommandHandler.Handle: Entrada creada con ID (long): 1, RowId: architecture-morla-morla-clean-architecture-cqrs-D5A95E
+[2026-04-02 09:22:47] [INF] KnowledgeTools.SetKnowledge: Entrada creada exitosamente con ID Knowledge entry created successfully with ID: 1, RowId: architecture-morla-morla-clean-architecture-cqrs-D5A95E
+[2026-04-02 09:22:47] [INF] "set_knowledge" completed. IsError = false.
+[2026-04-02 09:22:47] [DBG] Server (morla.hosts 0.0.5.0), Client (Visual Studio Code 1.111.0) sending message.
+[2026-04-02 09:22:47] [INF] Server (morla.hosts 0.0.5.0), Client (Visual Studio Code 1.111.0) method 'tools/call' request handler completed in 1015.77ms.
+[2026-04-02 09:28:53] [DBG] Server (stream) (morla.hosts) transport received message with ID '6'.
+[2026-04-02 09:28:53] [DBG] Server (morla.hosts 0.0.5.0), Client (Visual Studio Code 1.111.0) read JsonRpcRequest message from channel.
+[2026-04-02 09:28:53] [INF] Server (morla.hosts 0.0.5.0), Client (Visual Studio Code 1.111.0) method 'tools/call' request handler called.
+[2026-04-02 09:28:53] [INF] KnowledgeTools.SearchKnowledge: Iniciando búsqueda...
+[2026-04-02 09:28:53] [DBG]   - SearchTerm: clean architecture CQRS, Topic: architecture, Project: null
+[2026-04-02 09:28:53] [INF] SearchKnowledgeQueryHandler.Handle: Iniciando búsqueda...
+[2026-04-02 09:28:53] [DBG]   - SearchTerm: clean architecture CQRS, Topic: architecture, Project: null
+[2026-04-02 09:28:53] [INF] KnowledgeRepository.SearchAsync: Iniciando búsqueda híbrida (BGE-Small + Keywords)...
+[2026-04-02 09:28:53] [ERR] Failed executing DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "k"."Id", "k"."Content", "k"."CreatedAt", "k"."Project", "k"."RowId", "k"."Summary", "k"."Title", "k"."Topic", "k"."UpdatedAt"
+FROM "Knowledges" AS "k"
+[2026-04-02 09:28:53] [ERR] An exception occurred while iterating over the results of a query for context type 'Morla.Infrastructure.Database.MorlaContext'.
+Microsoft.Data.Sqlite.SqliteException (0x80004005): SQLite Error 1: 'no such table: Knowledges'.
+   at Microsoft.Data.Sqlite.SqliteException.ThrowExceptionForRC(Int32 rc, sqlite3 db)
+   at Microsoft.Data.Sqlite.SqliteCommand.PrepareAndEnumerateStatements()+MoveNext()
+   at Microsoft.Data.Sqlite.SqliteCommand.GetStatements()+MoveNext()
+   at Microsoft.Data.Sqlite.SqliteDataReader.NextResult()
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteReader(CommandBehavior behavior)
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+Microsoft.Data.Sqlite.SqliteException (0x80004005): SQLite Error 1: 'no such table: Knowledges'.
+   at Microsoft.Data.Sqlite.SqliteException.ThrowExceptionForRC(Int32 rc, sqlite3 db)
+   at Microsoft.Data.Sqlite.SqliteCommand.PrepareAndEnumerateStatements()+MoveNext()
+   at Microsoft.Data.Sqlite.SqliteCommand.GetStatements()+MoveNext()
+   at Microsoft.Data.Sqlite.SqliteDataReader.NextResult()
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteReader(CommandBehavior behavior)
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+[2026-04-02 09:28:53] [ERR] KnowledgeRepository.SearchAsync: Error crítico
+Microsoft.Data.Sqlite.SqliteException (0x80004005): SQLite Error 1: 'no such table: Knowledges'.
+   at Microsoft.Data.Sqlite.SqliteException.ThrowExceptionForRC(Int32 rc, sqlite3 db)
+   at Microsoft.Data.Sqlite.SqliteCommand.PrepareAndEnumerateStatements()+MoveNext()
+   at Microsoft.Data.Sqlite.SqliteCommand.GetStatements()+MoveNext()
+   at Microsoft.Data.Sqlite.SqliteDataReader.NextResult()
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteReader(CommandBehavior behavior)
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at morla.infrastructure.repositories.KnowledgeRepository.Morla.Domain.Repository.IKnowledgeRepository.SearchAsync(String searchTerm, String topic, String project) in /Users/joseignaciomovellan/develop/dotnet/morla/src/morla.infrastructure/database/repositories/KnowledgeRepository.cs:line 374
+[2026-04-02 09:28:53] [ERR] SearchKnowledgeQueryHandler.Handle: Error en la búsqueda
+Microsoft.Data.Sqlite.SqliteException (0x80004005): SQLite Error 1: 'no such table: Knowledges'.
+   at Microsoft.Data.Sqlite.SqliteException.ThrowExceptionForRC(Int32 rc, sqlite3 db)
+   at Microsoft.Data.Sqlite.SqliteCommand.PrepareAndEnumerateStatements()+MoveNext()
+   at Microsoft.Data.Sqlite.SqliteCommand.GetStatements()+MoveNext()
+   at Microsoft.Data.Sqlite.SqliteDataReader.NextResult()
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteReader(CommandBehavior behavior)
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at morla.infrastructure.repositories.KnowledgeRepository.Morla.Domain.Repository.IKnowledgeRepository.SearchAsync(String searchTerm, String topic, String project) in /Users/joseignaciomovellan/develop/dotnet/morla/src/morla.infrastructure/database/repositories/KnowledgeRepository.cs:line 374
+   at Morla.Application.UseCases.Queries.SearchKnowledge.SearchKnowledgeQueryHandler.Handle(SearchKnowledgeQuery request, CancellationToken cancellationToken) in /Users/joseignaciomovellan/develop/dotnet/morla/src/morla.application/UseCases/Queries/SearchKnowledge/SearchKnowledgeQueryHandler.cs:line 24
+[2026-04-02 09:28:53] [ERR] KnowledgeTools.SearchKnowledge: Error en la búsqueda
+Microsoft.Data.Sqlite.SqliteException (0x80004005): SQLite Error 1: 'no such table: Knowledges'.
+   at Microsoft.Data.Sqlite.SqliteException.ThrowExceptionForRC(Int32 rc, sqlite3 db)
+   at Microsoft.Data.Sqlite.SqliteCommand.PrepareAndEnumerateStatements()+MoveNext()
+   at Microsoft.Data.Sqlite.SqliteCommand.GetStatements()+MoveNext()
+   at Microsoft.Data.Sqlite.SqliteDataReader.NextResult()
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteReader(CommandBehavior behavior)
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at morla.infrastructure.repositories.KnowledgeRepository.Morla.Domain.Repository.IKnowledgeRepository.SearchAsync(String searchTerm, String topic, String project) in /Users/joseignaciomovellan/develop/dotnet/morla/src/morla.infrastructure/database/repositories/KnowledgeRepository.cs:line 374
+   at Morla.Application.UseCases.Queries.SearchKnowledge.SearchKnowledgeQueryHandler.Handle(SearchKnowledgeQuery request, CancellationToken cancellationToken) in /Users/joseignaciomovellan/develop/dotnet/morla/src/morla.application/UseCases/Queries/SearchKnowledge/SearchKnowledgeQueryHandler.cs:line 24
+   at morla.infrastructure.tools.KnowledgeTools.SearchKnowledge(String searchTerm, String topic, String project) in /Users/joseignaciomovellan/develop/dotnet/morla/src/morla.infrastructure/tools/KnowledgeTools.cs:line 69
+[2026-04-02 09:28:53] [ERR] "search_knowledge" threw an unhandled exception.
+Microsoft.Data.Sqlite.SqliteException (0x80004005): SQLite Error 1: 'no such table: Knowledges'.
+   at Microsoft.Data.Sqlite.SqliteException.ThrowExceptionForRC(Int32 rc, sqlite3 db)
+   at Microsoft.Data.Sqlite.SqliteCommand.PrepareAndEnumerateStatements()+MoveNext()
+   at Microsoft.Data.Sqlite.SqliteCommand.GetStatements()+MoveNext()
+   at Microsoft.Data.Sqlite.SqliteDataReader.NextResult()
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteReader(CommandBehavior behavior)
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at morla.infrastructure.repositories.KnowledgeRepository.Morla.Domain.Repository.IKnowledgeRepository.SearchAsync(String searchTerm, String topic, String project) in /Users/joseignaciomovellan/develop/dotnet/morla/src/morla.infrastructure/database/repositories/KnowledgeRepository.cs:line 374
+   at Morla.Application.UseCases.Queries.SearchKnowledge.SearchKnowledgeQueryHandler.Handle(SearchKnowledgeQuery request, CancellationToken cancellationToken) in /Users/joseignaciomovellan/develop/dotnet/morla/src/morla.application/UseCases/Queries/SearchKnowledge/SearchKnowledgeQueryHandler.cs:line 24
+   at morla.infrastructure.tools.KnowledgeTools.SearchKnowledge(String searchTerm, String topic, String project) in /Users/joseignaciomovellan/develop/dotnet/morla/src/morla.infrastructure/tools/KnowledgeTools.cs:line 69
+   at Microsoft.Extensions.AI.AIFunctionFactory.ReflectionAIFunctionDescriptor.<>c__DisplayClass35_1.<<GetReturnParameterMarshaller>b__10>d.MoveNext()
+--- End of stack trace from previous location ---
+   at Microsoft.Extensions.AI.AIFunctionFactory.ReflectionAIFunction.InvokeCoreAsync(AIFunctionArguments arguments, CancellationToken cancellationToken)
+   at Microsoft.Extensions.AI.AIFunctionFactory.ReflectionAIFunction.InvokeCoreAsync(AIFunctionArguments arguments, CancellationToken cancellationToken)
+   at ModelContextProtocol.Server.AIFunctionMcpServerTool.InvokeAsync(RequestContext`1 request, CancellationToken cancellationToken)
+   at ModelContextProtocol.Server.McpServerImpl.<>c__DisplayClass51_1.<<ConfigureTools>b__4>d.MoveNext()
+--- End of stack trace from previous location ---
+   at ModelContextProtocol.Server.McpServerImpl.<>c__DisplayClass51_2.<<ConfigureTools>b__5>d.MoveNext()
+[2026-04-02 09:28:53] [DBG] Server (morla.hosts 0.0.5.0), Client (Visual Studio Code 1.111.0) sending message.
+[2026-04-02 09:28:53] [INF] Server (morla.hosts 0.0.5.0), Client (Visual Studio Code 1.111.0) method 'tools/call' request handler completed in 25.1995ms.
+[2026-04-02 09:32:22] [INF] Server (stream) (morla.hosts) transport completed reading messages.
+[2026-04-02 09:32:22] [INF] Application is shutting down...
+[2026-04-02 09:32:22] [DBG] Hosting stopping
+[2026-04-02 09:32:22] [DBG] Hosting stopped
+[2026-04-02 09:32:22] [INF] Server (stream) (morla.hosts) shutting down.
+[2026-04-02 09:32:22] [INF] Server (stream) (morla.hosts) shut down.
+[2026-04-02 09:32:22] [INF] McpRuntime: Host finalizado correctamente
+[2026-04-02 09:32:24] [INF] McpRuntime: Creando host...
+[2026-04-02 09:32:24] [INF] McpRuntime: Agregando servicios de infraestructura...
+[2026-04-02 09:32:24] [INF] AddCoreServices: Iniciando configuración de servicios core...
+[2026-04-02 09:32:24] [INF] AddCoreServices: Base de datos en: /Users/joseignaciomovellan/Library/Application Support/Morla/morla.db
+[2026-04-02 09:32:24] [INF] AddCoreServices: DbContext configurado
+[2026-04-02 09:32:24] [INF] AddCoreServices: Repositorios registrados
+[2026-04-02 09:32:24] [INF] AddCoreServices: Iniciando migraciones de base de datos...
+[2026-04-02 09:32:24] [INF] VssInterceptor: Abriendo conexión SQLite, intentando cargar vec0...
+[2026-04-02 09:32:24] [INF] VssInterceptor: Archivo vec0 encontrado en /Users/joseignaciomovellan/.dotnet/tools/.store/morla/0.0.6/morla/0.0.6/tools/net10.0/any/vec0.dylib
+[2026-04-02 09:32:24] [INF] VssInterceptor: Habilitando extensiones SQLite...
+[2026-04-02 09:32:24] [INF] VssInterceptor: Cargando extensión vec0...
+[2026-04-02 09:32:24] [INF] VssInterceptor: Extensión vec0 cargada exitosamente
+[2026-04-02 09:32:24] [INF] VssInterceptor: Abriendo conexión SQLite, intentando cargar vec0...
+[2026-04-02 09:32:24] [INF] VssInterceptor: Archivo vec0 encontrado en /Users/joseignaciomovellan/.dotnet/tools/.store/morla/0.0.6/morla/0.0.6/tools/net10.0/any/vec0.dylib
+[2026-04-02 09:32:24] [INF] VssInterceptor: Habilitando extensiones SQLite...
+[2026-04-02 09:32:24] [INF] VssInterceptor: Cargando extensión vec0...
+[2026-04-02 09:32:24] [INF] VssInterceptor: Extensión vec0 cargada exitosamente
+[2026-04-02 09:32:24] [INF] VssInterceptor: Abriendo conexión SQLite, intentando cargar vec0...
+[2026-04-02 09:32:24] [INF] VssInterceptor: Archivo vec0 encontrado en /Users/joseignaciomovellan/.dotnet/tools/.store/morla/0.0.6/morla/0.0.6/tools/net10.0/any/vec0.dylib
+[2026-04-02 09:32:24] [INF] VssInterceptor: Habilitando extensiones SQLite...
+[2026-04-02 09:32:24] [INF] VssInterceptor: Cargando extensión vec0...
+[2026-04-02 09:32:24] [INF] VssInterceptor: Extensión vec0 cargada exitosamente
+[2026-04-02 09:32:24] [INF] AddCoreServices: Migraciones completadas exitosamente
+[2026-04-02 09:32:24] [INF] AddCoreServices: Servicios core configurados correctamente
+[2026-04-02 09:32:24] [INF] McpRuntime: Configurando servidor MCP...
+[2026-04-02 09:32:24] [INF] McpRuntime: Compilando host...
+[2026-04-02 09:32:24] [INF] McpRuntime: Iniciando host...
+[2026-04-02 09:32:24] [DBG] Hosting starting
+[2026-04-02 09:32:24] [INF] Server (stream) (morla.hosts) transport reading messages.
+[2026-04-02 09:32:24] [DBG] Server (stream) (morla.hosts) transport received message with ID '1'.
+[2026-04-02 09:32:24] [INF] Application started. Press Ctrl+C to shut down.
+[2026-04-02 09:32:24] [INF] Hosting environment: Production
+[2026-04-02 09:32:24] [INF] Content root path: /Users/joseignaciomovellan/develop/dotnet/morla
+[2026-04-02 09:32:24] [DBG] Hosting started
+[2026-04-02 09:32:24] [DBG] Server (morla.hosts 0.0.6.0) read JsonRpcRequest message from channel.
+[2026-04-02 09:32:24] [INF] Server (morla.hosts 0.0.6.0) method 'initialize' request handler called.
+[2026-04-02 09:32:24] [DBG] Server (morla.hosts 0.0.6.0), Client (Visual Studio Code 1.111.0) sending message.
+[2026-04-02 09:32:24] [DBG] Server (stream) (morla.hosts) transport received message with ID '2'.
+[2026-04-02 09:32:24] [DBG] Server (stream) (morla.hosts) transport received message with ID '(no id)'.
+[2026-04-02 09:32:24] [DBG] Server (stream) (morla.hosts) transport received message with ID '3'.
+[2026-04-02 09:32:24] [DBG] Server (morla.hosts 0.0.6.0), Client (Visual Studio Code 1.111.0) read JsonRpcRequest message from channel.
+[2026-04-02 09:32:24] [INF] Server (morla.hosts 0.0.6.0), Client (Visual Studio Code 1.111.0) method 'logging/setLevel' request handler called.
+[2026-04-02 09:32:24] [DBG] Server (morla.hosts 0.0.6.0), Client (Visual Studio Code 1.111.0) read JsonRpcNotification message from channel.
+[2026-04-02 09:32:24] [DBG] Server (morla.hosts 0.0.6.0), Client (Visual Studio Code 1.111.0) read JsonRpcRequest message from channel.
+[2026-04-02 09:32:24] [INF] Server (morla.hosts 0.0.6.0), Client (Visual Studio Code 1.111.0) method 'tools/list' request handler called.
+[2026-04-02 09:32:24] [DBG] Server (morla.hosts 0.0.6.0), Client (Visual Studio Code 1.111.0) sending message.
+[2026-04-02 09:32:24] [DBG] Server (morla.hosts 0.0.6.0), Client (Visual Studio Code 1.111.0) sending message.
+[2026-04-02 09:32:24] [INF] Server (morla.hosts 0.0.6.0), Client (Visual Studio Code 1.111.0) method 'tools/list' request handler completed in 3.1484ms.
+[2026-04-02 09:32:24] [INF] Server (morla.hosts 0.0.6.0), Client (Visual Studio Code 1.111.0) method 'logging/setLevel' request handler completed in 1.4428ms.
+[2026-04-02 09:32:24] [INF] Server (morla.hosts 0.0.6.0), Client (Visual Studio Code 1.111.0) method 'initialize' request handler completed in 9.2655ms.
+[2026-04-02 09:33:52] [INF] Server (stream) (morla.hosts) transport completed reading messages.
+[2026-04-02 09:33:52] [INF] Application is shutting down...
+[2026-04-02 09:33:52] [DBG] Hosting stopping
+[2026-04-02 09:33:52] [DBG] Hosting stopped
+[2026-04-02 09:33:52] [INF] Server (stream) (morla.hosts) shutting down.
+[2026-04-02 09:33:52] [INF] Server (stream) (morla.hosts) shut down.
+[2026-04-02 09:33:52] [INF] McpRuntime: Host finalizado correctamente
+[2026-04-02 09:34:39] [INF] McpRuntime: Creando host...
+[2026-04-02 09:34:39] [INF] McpRuntime: Agregando servicios de infraestructura...
+[2026-04-02 09:34:39] [INF] AddCoreServices: Iniciando configuración de servicios core...
+[2026-04-02 09:34:39] [INF] AddCoreServices: Base de datos en: /Users/joseignaciomovellan/Library/Application Support/Morla/morla.db
+[2026-04-02 09:34:39] [INF] AddCoreServices: DbContext configurado
+[2026-04-02 09:34:39] [INF] AddCoreServices: Repositorios registrados
+[2026-04-02 09:34:39] [INF] AddCoreServices: Iniciando migraciones de base de datos...
+[2026-04-02 09:34:39] [INF] VssInterceptor: Abriendo conexión SQLite, intentando cargar vec0...
+[2026-04-02 09:34:39] [INF] VssInterceptor: Archivo vec0 encontrado en /Users/joseignaciomovellan/.dotnet/tools/.store/morla/0.0.6/morla/0.0.6/tools/net10.0/any/vec0.dylib
+[2026-04-02 09:34:39] [INF] VssInterceptor: Habilitando extensiones SQLite...
+[2026-04-02 09:34:39] [INF] VssInterceptor: Cargando extensión vec0...
+[2026-04-02 09:34:39] [INF] VssInterceptor: Extensión vec0 cargada exitosamente
+[2026-04-02 09:34:39] [INF] VssInterceptor: Abriendo conexión SQLite, intentando cargar vec0...
+[2026-04-02 09:34:39] [INF] VssInterceptor: Archivo vec0 encontrado en /Users/joseignaciomovellan/.dotnet/tools/.store/morla/0.0.6/morla/0.0.6/tools/net10.0/any/vec0.dylib
+[2026-04-02 09:34:39] [INF] VssInterceptor: Habilitando extensiones SQLite...
+[2026-04-02 09:34:39] [INF] VssInterceptor: Cargando extensión vec0...
+[2026-04-02 09:34:39] [INF] VssInterceptor: Extensión vec0 cargada exitosamente
+[2026-04-02 09:34:39] [INF] VssInterceptor: Abriendo conexión SQLite, intentando cargar vec0...
+[2026-04-02 09:34:39] [INF] VssInterceptor: Archivo vec0 encontrado en /Users/joseignaciomovellan/.dotnet/tools/.store/morla/0.0.6/morla/0.0.6/tools/net10.0/any/vec0.dylib
+[2026-04-02 09:34:39] [INF] VssInterceptor: Habilitando extensiones SQLite...
+[2026-04-02 09:34:39] [INF] VssInterceptor: Cargando extensión vec0...
+[2026-04-02 09:34:39] [INF] VssInterceptor: Extensión vec0 cargada exitosamente
+[2026-04-02 09:34:39] [INF] AddCoreServices: Migraciones completadas exitosamente
+[2026-04-02 09:34:39] [INF] AddCoreServices: Servicios core configurados correctamente
+[2026-04-02 09:34:39] [INF] McpRuntime: Configurando servidor MCP...
+[2026-04-02 09:34:39] [INF] McpRuntime: Compilando host...
+[2026-04-02 09:34:39] [INF] McpRuntime: Iniciando host...
+[2026-04-02 09:34:39] [DBG] Hosting starting
+[2026-04-02 09:34:39] [INF] Server (stream) (morla.hosts) transport reading messages.
+[2026-04-02 09:34:39] [DBG] Server (stream) (morla.hosts) transport received message with ID '1'.
+[2026-04-02 09:34:39] [INF] Application started. Press Ctrl+C to shut down.
+[2026-04-02 09:34:39] [INF] Hosting environment: Production
+[2026-04-02 09:34:39] [INF] Content root path: /Users/joseignaciomovellan/develop/dotnet/morla
+[2026-04-02 09:34:39] [DBG] Hosting started
+[2026-04-02 09:34:39] [DBG] Server (morla.hosts 0.0.6.0) read JsonRpcRequest message from channel.
+[2026-04-02 09:34:39] [INF] Server (morla.hosts 0.0.6.0) method 'initialize' request handler called.
+[2026-04-02 09:34:39] [DBG] Server (morla.hosts 0.0.6.0), Client (Visual Studio Code 1.111.0) sending message.
+[2026-04-02 09:34:39] [DBG] Server (stream) (morla.hosts) transport received message with ID '2'.
+[2026-04-02 09:34:39] [DBG] Server (stream) (morla.hosts) transport received message with ID '(no id)'.
+[2026-04-02 09:34:39] [DBG] Server (stream) (morla.hosts) transport received message with ID '3'.
+[2026-04-02 09:34:39] [DBG] Server (morla.hosts 0.0.6.0), Client (Visual Studio Code 1.111.0) read JsonRpcRequest message from channel.
+[2026-04-02 09:34:39] [INF] Server (morla.hosts 0.0.6.0), Client (Visual Studio Code 1.111.0) method 'logging/setLevel' request handler called.
+[2026-04-02 09:34:39] [DBG] Server (morla.hosts 0.0.6.0), Client (Visual Studio Code 1.111.0) read JsonRpcNotification message from channel.
+[2026-04-02 09:34:39] [DBG] Server (morla.hosts 0.0.6.0), Client (Visual Studio Code 1.111.0) read JsonRpcRequest message from channel.
+[2026-04-02 09:34:39] [INF] Server (morla.hosts 0.0.6.0), Client (Visual Studio Code 1.111.0) method 'tools/list' request handler called.
+[2026-04-02 09:34:39] [DBG] Server (stream) (morla.hosts) transport received message with ID '4'.
+[2026-04-02 09:34:39] [DBG] Server (morla.hosts 0.0.6.0), Client (Visual Studio Code 1.111.0) read JsonRpcRequest message from channel.
+[2026-04-02 09:34:39] [INF] Server (morla.hosts 0.0.6.0), Client (Visual Studio Code 1.111.0) method 'tools/call' request handler called.
+[2026-04-02 09:34:39] [DBG] Server (morla.hosts 0.0.6.0), Client (Visual Studio Code 1.111.0) sending message.
+[2026-04-02 09:34:39] [DBG] Server (morla.hosts 0.0.6.0), Client (Visual Studio Code 1.111.0) sending message.
+[2026-04-02 09:34:39] [INF] Server (morla.hosts 0.0.6.0), Client (Visual Studio Code 1.111.0) method 'initialize' request handler completed in 7.7279ms.
+[2026-04-02 09:34:39] [INF] Server (morla.hosts 0.0.6.0), Client (Visual Studio Code 1.111.0) method 'logging/setLevel' request handler completed in 1.4461ms.
+[2026-04-02 09:34:39] [INF] Server (morla.hosts 0.0.6.0), Client (Visual Studio Code 1.111.0) method 'tools/list' request handler completed in 2.9283ms.
+[2026-04-02 09:34:39] [INF] KnowledgeTools.SearchKnowledge: Iniciando búsqueda...
+[2026-04-02 09:34:39] [DBG]   - SearchTerm: arquitectura, Topic: null, Project: null
+[2026-04-02 09:34:39] [INF] SearchKnowledgeQueryHandler.Handle: Iniciando búsqueda...
+[2026-04-02 09:34:39] [DBG]   - SearchTerm: arquitectura, Topic: null, Project: null
+[2026-04-02 09:34:39] [INF] KnowledgeRepository.SearchAsync: Iniciando búsqueda híbrida (BGE-Small + Keywords)...
+[2026-04-02 09:34:39] [INF] KnowledgeRepository.SearchAsync: Ejecutando búsqueda vectorial...
+[2026-04-02 09:34:40] [INF] KnowledgeRepository.GetEmbeddingGenerator: LocalEmbeddingGenerator inicializado correctamente
+[2026-04-02 09:34:40] [INF] KnowledgeRepository.SearchAsync: Ejecutando fallback de palabras clave...
+[2026-04-02 09:34:40] [INF] SearchKnowledgeQueryHandler.Handle: Búsqueda completada. Resultados: 0
+[2026-04-02 09:34:40] [INF] KnowledgeTools.SearchKnowledge: Búsqueda completada. Resultados encontrados: 0
+[2026-04-02 09:34:40] [INF] "search_knowledge" completed. IsError = false.
+[2026-04-02 09:34:40] [DBG] Server (morla.hosts 0.0.6.0), Client (Visual Studio Code 1.111.0) sending message.
+[2026-04-02 09:34:40] [INF] Server (morla.hosts 0.0.6.0), Client (Visual Studio Code 1.111.0) method 'tools/call' request handler completed in 1170.5015ms.
+[2026-04-02 09:35:31] [INF] Application is shutting down...
+[2026-04-02 09:35:31] [DBG] Hosting stopping
+[2026-04-02 09:35:31] [INF] Server (morla.hosts 0.0.6.0), Client (Visual Studio Code 1.111.0) message processing canceled.
+[2026-04-02 09:35:31] [DBG] Hosting stopped
+[2026-04-02 09:35:31] [INF] Server (stream) (morla.hosts) shutting down.
+[2026-04-02 09:35:31] [INF] Server (stream) (morla.hosts) transport message reading canceled.
+[2026-04-02 09:35:31] [INF] Server (stream) (morla.hosts) shut down.
+[2026-04-02 09:35:31] [INF] McpRuntime: Host finalizado correctamente

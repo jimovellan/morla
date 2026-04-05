@@ -15,9 +15,17 @@ public static class IServiceCollectionExtensions
     {
         Log.Information("AddCoreServices: Iniciando configuración de servicios core...");
         
+        // Crear ruta de base de datos multiplataforma
+        var appDataFolder = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        var morlaFolder = Path.Combine(appDataFolder, "Morla");
+        Directory.CreateDirectory(morlaFolder);
+        var dbPath = Path.Combine(morlaFolder, "morla.db");
+        
+        Log.Information("AddCoreServices: Base de datos en: {DbPath}", dbPath);
+        
         services.AddDbContext<MorlaContext>(options =>
         {
-            options.UseSqlite("Data Source=morla.db");
+            options.UseSqlite($"Data Source={dbPath}");
         });
             
         Log.Information("AddCoreServices: DbContext configurado");

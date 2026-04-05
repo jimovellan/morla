@@ -356,11 +356,12 @@ public async Task UpdateAsync(Knowledge knowledge)
     }
 
 
-async Task<List<(Knowledge Knowledge, int Score)>> IKnowledgeRepository.SearchAsync(string? searchTerm, string? topic, string? project)
+async Task<List<(Knowledge Knowledge, int Score)>> IKnowledgeRepository.SearchAsync(string? searchTerm, string? topic, string? project, int limit = 5)
 {
     try
     {
         Serilog.Log.Information("KnowledgeRepository.SearchAsync: Iniciando búsqueda híbrida (BGE-Small + Keywords)...");
+        Serilog.Log.Debug("  - Limit: {Limit}", limit);
 
         if (string.IsNullOrWhiteSpace(searchTerm))
         {
@@ -432,7 +433,7 @@ async Task<List<(Knowledge Knowledge, int Score)>> IKnowledgeRepository.SearchAs
             var topVectorMatches = vectorScores
                 .Where(kvp => kvp.Value >= MIN_VECTOR_SCORE)
                 .OrderByDescending(kvp => kvp.Value)
-                .Take(15) // Limitamos a los mejores matches semánticos
+                .Take(limit) // Limitamos a los N mejores matches semánticos
                 .ToList();
 
             if (topVectorMatches.Any())
@@ -494,7 +495,7 @@ async Task<List<(Knowledge Knowledge, int Score)>> IKnowledgeRepository.SearchAs
             }
         }
 
-        return results.OrderByDescending(x => x.Item2).ToList();
+        return results.OrderByDescending(x => x.Item2).Take(limit).ToList();
     }
     catch (Exception ex)
     {
@@ -502,4 +503,69 @@ async Task<List<(Knowledge Knowledge, int Score)>> IKnowledgeRepository.SearchAs
         throw;
     }
 }
+
+    /// <summary>
+    /// Obtiene la última sesión (más reciente por CreatedAt)
+    /// </summary>
+    public async Task<Knowledge?> GetLastSessionAsync(string? project = null)
+    {
+        try
+        {
+            Serilog.Log.Information("KnowledgeRepository.GetLastSessionAsync: Obteniendo última sesión...");
+            Serilog.Log.Debug("  - Project: {Project}", project ?? "null");
+
+            var query = _context.Knowledges
+                .Where(k => k.Topic == morla.domain.constants.TopicNames.SESSION_TOPIC);
+
+            if (!string.IsNullOrEmpty(project))
+                query = query.Where(k => k.Project == project);
+
+            var lastSession = await query
+                .OrderByDescending(k => k.CreatedAt)
+                .FirstOrDefaultAsync();
+
+            Serilog.Log.Information("KnowledgeRepository.GetLastSessionAsync: ✅ Sesión obtenida. RowId: {RowId}", 
+                lastSession?.RowId ?? "null");
+            
+            return lastSession;
+        }
+        catch (Exception ex)
+        {
+            Serilog.Log.Error(ex, "KnowledgeRepository.GetLastSessionAsync: Error");
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Obtiene las N últimas sesiones ordenadas por CreatedAt DESC
+    /// </summary>
+    public async Task<List<Knowledge>> GetLatestSessionsAsync(int limit = 3, string? project = null)
+    {
+        try
+        {
+            Serilog.Log.Information("KnowledgeRepository.GetLatestSessionsAsync: Obteniendo últimas {Limit} sesiones...", limit);
+            Serilog.Log.Debug("  - Project: {Project}, Limit: {Limit}", project ?? "null", limit);
+
+            var query = _context.Knowledges
+                .Where(k => k.Topic == morla.domain.constants.TopicNames.SESSION_TOPIC);
+
+            if (!string.IsNullOrEmpty(project))
+                query = query.Where(k => k.Project == project);
+
+            var latestSessions = await query
+                .OrderByDescending(k => k.CreatedAt)
+                .Take(limit)
+                .ToListAsync();
+
+            Serilog.Log.Information("KnowledgeRepository.GetLatestSessionsAsync: ✅ Obtenidas {Count} sesiones", 
+                latestSessions.Count);
+            
+            return latestSessions;
+        }
+        catch (Exception ex)
+        {
+            Serilog.Log.Error(ex, "KnowledgeRepository.GetLatestSessionsAsync: Error");
+            throw;
+        }
+    }
 }

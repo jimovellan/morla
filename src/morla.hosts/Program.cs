@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Morla.hosts.MCP.Runtime;
 using Morla.hosts.Server.Runtime;
+using Morla.hosts.Setup;
 using Morla.Infrastructure.Extensions;
 
 // =====================
@@ -56,6 +57,17 @@ uiCommand.SetHandler(() =>
 });
 
 // =====================
+// SETUP COMMAND
+// =====================
+var setupCommand = new Command("setup", "Configura archivos globales de Morla");
+
+setupCommand.SetHandler(async () =>
+{
+    var setupService = new SetupService();
+    await setupService.ExecuteAsync();
+});
+
+// =====================
 // ROOT COMMAND
 // =====================
 var rootCommand = new RootCommand("MyTool CLI");
@@ -63,6 +75,7 @@ var rootCommand = new RootCommand("MyTool CLI");
 rootCommand.AddCommand(mcpCommand);
 rootCommand.AddCommand(serverCommand);
 rootCommand.AddCommand(uiCommand);
+rootCommand.AddCommand(setupCommand);
 
 // HELP automático incluido
 await rootCommand.InvokeAsync(args);
