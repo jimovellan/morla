@@ -1,0 +1,77 @@
+name: Publish NuGet Package
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Extract version from tag
+        id: version
+        run: |
+          # Extract version from tag: v0.0.17 -> 0.0.17
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "📦 Publishing version: $VERSION"
+
+      - name: Update Version in .csproj
+        run: |
+          VERSION=${{ steps.version.outputs.VERSION }}
+          
+          # Update morla.hosts.csproj
+          sed -i "s/<Version>.*<\/Version>/<Version>$VERSION<\/Version>/g" src/morla.hosts/morla.hosts.csproj
+          sed -i "s/<Version>.*<\/Version>/<Version>$VERSION<\/Version>/g" src/morla.hosts.server/morla.hosts.server.csproj
+          
+          echo "✅ Version updated to $VERSION"
+          echo "morla.hosts.csproj:"
+          grep -A 1 "<Version>" src/morla.hosts/morla.hosts.csproj | head -1
+          echo "morla.hosts.server.csproj:"
+          grep -A 1 "<Version>" src/morla.hosts.server/morla.hosts.server.csproj | head -1
+
+      - name: Build project
+        run: |
+          dotnet build -c Release morla.sln
+          echo "✅ Build completed successfully"
+
+      - name: Create NuGet package
+        run: |
+          dotnet pack src/morla.hosts/morla.hosts.csproj -c Release -o ./nupkg
+          echo "✅ Package created"
+          ls -lh nupkg/
+
+      - name: Publish to NuGet.org
+        run: |
+          dotnet nuget push nupkg/*.nupkg \
+            --api-key ${{ secrets.NUGET_API_KEY }} \
+            --source https://api.nuget.org/v3/index.json \
+            --skip-duplicate
+          echo "✅ Package published to nuget.org"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: nupkg/*.nupkg
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Slack Notification (Optional)
+        if: success()
+        run: |
+          echo "🎉 Successfully published Morla v${{ steps.version.outputs.VERSION }} to nuget.org"
