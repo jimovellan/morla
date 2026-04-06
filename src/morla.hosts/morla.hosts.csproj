@@ -10,7 +10,7 @@
     <!-- nombre del comando -->
     <ToolCommandName>morla</ToolCommandName>
     <PackageId>Morla</PackageId>
-    <Version>0.0.15</Version>
+    <Version>0.0.16</Version>
     <Authors>Jim</Authors>
   </PropertyGroup>
 <ItemGroup>
