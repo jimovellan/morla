@@ -1,18 +1,12 @@
 using System.ComponentModel;
-using System.Data.Common;
 using MediatR;
 using ModelContextProtocol.Server;
 using Morla.Application.UseCases.Commands.CreateKnowledge;
 using Morla.Application.UseCases.Commands.UpdateKnowledge;
 using Morla.Application.UseCases.Queries.SearchKnowledge;
 using Morla.Application.UseCases.Queries.GetKnowledgeById;
-using Morla.Application.UseCases.Queries.GetLastSession;
-using Morla.Application.UseCases.Queries.GetLatestSessions;
-using Morla.Domain.Models;
 using Morla.Domain.Repository;
 using Serilog;
-using Morla.Application.UseCases.Commands.SaveSesion;
-using System.Linq.Expressions;
 
 namespace morla.infrastructure.tools;
 
@@ -128,71 +122,4 @@ public class KnowledgeTools
         }
     }
 
-    [McpServerTool, Description("Tool to get the last (most recent) session")]
-    public async Task<GetLastSessionDto?> GetLastSession(string? project = null)
-    {
-        try
-        {
-            Log.Information("KnowledgeTools.GetLastSession: Obteniendo última sesión...");
-            Log.Debug("  - Project: {Project}", project ?? "null");
-            
-            var result = await _sender.Send(new GetLastSessionQuery(project));
-            
-            if (result == null)
-            {
-                Log.Information("KnowledgeTools.GetLastSession: No se encontraron sesiones");
-                return null;
-            }
-            
-            Log.Information("KnowledgeTools.GetLastSession: ✅ Sesión obtenida. RowId: {RowId}", result.RowId);
-            return result;
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "KnowledgeTools.GetLastSession: Error al obtener última sesión");
-            throw;
-        }
-    }
-
-    [McpServerTool, Description("Tool to get the latest sessions ordered by creation date")]
-    public async Task<List<GetLatestSessionDto>> GetLatestSessions(int limit = 3, string? project = null)
-    {
-        try
-        {
-            Log.Information("KnowledgeTools.GetLatestSessions: Obteniendo últimas sesiones...");
-            Log.Debug("  - Limit: {Limit}, Project: {Project}", limit, project ?? "null");
-            
-            var result = await _sender.Send(new GetLatestSessionsQuery(limit, project));
-            
-            Log.Information("KnowledgeTools.GetLatestSessions: ✅ Sesiones obtenidas. Count: {Count}", result.Count);
-            return result;
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "KnowledgeTools.GetLatestSessions: Error al obtener últimas sesiones");
-            throw;
-        }
-    }
-
-    [McpServerTool, Description("Tool to save a current session")]
-    public async Task<string> SaveSession(string project, string topic, string title, string summary, string content)
-    {
-        try
-        {
-            Log.Information("KnowledgeTools.SaveSession: Guardando sesión...");
-            Log.Debug("  - Project: {Project}, Topic: {Topic}, Title: {Title}", project, topic, title);
-            
-     
-            
-           var result =await _sender.Send(new CreateSesionCommand(content,summary,project,content));
-            
-            Log.Information("KnowledgeTools.SaveSession: ✅ Sesión guardada exitosamente. RowId: {RowId}", result);
-            return $"Session saved successfully with ID: {result}";
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "KnowledgeTools.SaveSession: Error al guardar sesión");
-            throw;
-        }
-    }
 }
