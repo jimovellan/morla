@@ -20,24 +20,37 @@
     <PackageTags>knowledge-base,mcp,semantic-search,cli,embeddings,dotnet</PackageTags>
     <ReleaseNotes>https://github.com/joseignaciomovellan/morla/releases</ReleaseNotes>
   </PropertyGroup>
-<ItemGroup>
-  <None Include="..\..\extensions\*.dll">
-    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    <Pack>true</Pack>
-    <PackagePath></PackagePath>
-  </None>
-  
-  <None Include="..\..\extensions\*.so">
-    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    <Pack>true</Pack>
-    <PackagePath></PackagePath>
-  </None>
-  <None Include="..\..\extensions\*.dylib">
-    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    <Pack>true</Pack>
-    <PackagePath></PackagePath>
-  </None>
-  <Content Include="..\..\models\**\*">
+
+  <!-- Windows extensions (DLL) -->
+  <ItemGroup Condition="$(IsWindows)">
+    <None Include="..\..\extensions\*.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Pack>true</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+
+  <!-- Linux extensions (SO) -->
+  <ItemGroup Condition="$(IsLinux)">
+    <None Include="..\..\extensions\*.so">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Pack>true</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+
+  <!-- macOS extensions (DYLIB) -->
+  <ItemGroup Condition="$(IsMacOS)">
+    <None Include="..\..\extensions\*.dylib">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Pack>true</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+
+  <!-- Models (platform-agnostic) -->
+  <ItemGroup>
+    <Content Include="..\..\models\**\*">
     <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     <Pack>true</Pack>
     <PackagePath>tools/net10.0/any/models/</PackagePath>
