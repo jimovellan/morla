@@ -67,19 +67,86 @@ public async Task AddKnowledgeAsync(Knowledge knowledge)
         if (string.IsNullOrEmpty(knowledge.RowId))
             knowledge.RowId = TrackingKeyHelper.GenerateTrackingKey(knowledge.Topic, knowledge.Project, knowledge.Title);
 
-        _context.Knowledges.Add(knowledge);
-        await _context.SaveChangesAsync();
+        // Verificar si ya existe con ese RowId (hacer upsert)
+        var existingKnowledge = await _context.Knowledges.FirstOrDefaultAsync(k => k.RowId == knowledge.RowId);
+        
+        if (existingKnowledge != null)
+        {
+            // Actualizar registro existente
+            existingKnowledge.Title = knowledge.Title;
+            existingKnowledge.Summary = knowledge.Summary;
+            existingKnowledge.Content = knowledge.Content;
+            existingKnowledge.Topic = knowledge.Topic;
+            existingKnowledge.Project = knowledge.Project;
+            existingKnowledge.UpdatedAt = DateTime.UtcNow;
+            
+            _context.Knowledges.Update(existingKnowledge);
+        }
+        else
+        {
+            // Crear nuevo registro
+            knowledge.CreatedAt = DateTime.UtcNow;
+            knowledge.UpdatedAt = DateTime.UtcNow;
+            _context.Knowledges.Add(knowledge);
+        }
+        
+        try
+        {
+            await _context.SaveChangesAsync();
+        }
+        catch (Microsoft.EntityFrameworkCore.DbUpdateException dbEx) when (
+            dbEx.InnerException is Microsoft.Data.Sqlite.SqliteException sqliteEx &&
+            sqliteEx.SqliteErrorCode == 19 && // UNIQUE constraint failure
+            dbEx.Message.Contains("RowId"))
+        {
+            // Condición de carrera: otro proceso insertó el mismo RowId
+            // Reintentamos como update
+            Serilog.Log.Warning(
+                "KnowledgeRepository.AddKnowledgeAsync: Condición de carrera detectada para RowId '{RowId}'. Reintentando como update...", 
+                knowledge.RowId);
+            
+            // Limpiar el DbContext y recargar desde la BD
+            _context.ChangeTracker.Clear();
+            
+            var reloadedKnowledge = await _context.Knowledges.FirstOrDefaultAsync(k => k.RowId == knowledge.RowId);
+            if (reloadedKnowledge != null)
+            {
+                reloadedKnowledge.Title = knowledge.Title;
+                reloadedKnowledge.Summary = knowledge.Summary;
+                reloadedKnowledge.Content = knowledge.Content;
+                reloadedKnowledge.Topic = knowledge.Topic;
+                reloadedKnowledge.Project = knowledge.Project;
+                reloadedKnowledge.UpdatedAt = DateTime.UtcNow;
+                
+                _context.Knowledges.Update(reloadedKnowledge);
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        // Obtener el ID del registro (necesario tanto para create como para update)
+        var savedKnowledge = await _context.Knowledges.FirstOrDefaultAsync(k => k.RowId == knowledge.RowId);
+        if (savedKnowledge == null)
+            throw new InvalidOperationException($"No se pudo guardar o encontrar el conocimiento con RowId '{knowledge.RowId}'");
+
+        // 🟢 Limpiar embeddings antiguos si es actualización
+        using (var delCmd = _context.Database.GetDbConnection().CreateCommand())
+        {
+            delCmd.CommandText = "DELETE FROM knowledges_embedding WHERE rowid = $rowid";
+            delCmd.Parameters.Add(new Microsoft.Data.Sqlite.SqliteParameter("$rowid", savedKnowledge.Id));
+
+            if (delCmd.Connection.State != System.Data.ConnectionState.Open)
+                await delCmd.Connection.OpenAsync();
+
+            await delCmd.ExecuteNonQueryAsync();
+        }
 
         // 🟢 USAMOS TEXTO ORIGINAL (BGE prefiere acentos y ñ)
-        string fullText = $"{knowledge.Title} {knowledge.Summary} {knowledge.Content}";
+        string fullText = $"{savedKnowledge.Title} {savedKnowledge.Summary} {savedKnowledge.Content}";
         
         // Solo pasamos a minúsculas, NO normalizamos acentos para el vector
         var textForEmbedding = fullText.ToLowerInvariant();
 
         var chunks = SplitIntoChunks(textForEmbedding, split_in_chunks);
-
-        // Limpiar embeddings previos... (tu código de DELETE está bien)
-        // ...
 
         foreach (var chunk in chunks)
         {
@@ -98,7 +165,7 @@ public async Task AddKnowledgeAsync(Knowledge knowledge)
 
             using var cmd = _context.Database.GetDbConnection().CreateCommand();
             cmd.CommandText = "INSERT INTO knowledges_embedding (rowid, embedding) VALUES ($rowid, $embedding)";
-            cmd.Parameters.Add(new Microsoft.Data.Sqlite.SqliteParameter("$rowid", knowledge.Id));
+            cmd.Parameters.Add(new Microsoft.Data.Sqlite.SqliteParameter("$rowid", savedKnowledge.Id));
             cmd.Parameters.Add(new Microsoft.Data.Sqlite.SqliteParameter("$embedding", blob));
 
             if (cmd.Connection.State != System.Data.ConnectionState.Open)

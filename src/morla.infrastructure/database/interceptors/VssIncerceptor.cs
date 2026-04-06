@@ -58,7 +58,7 @@ public class VssInterceptor : DbConnectionInterceptor
         var extensionName = GetExtensionFileName();
         var fullPath = Path.Combine(baseDir, extensionName);
         
-        Console.WriteLine($"Buscando vec0 en: {fullPath}");
+        Log.Debug("VssInterceptor: Buscando vec0 en {ExtensionPath}", fullPath);
         
         return fullPath;
     }

@@ -38,8 +38,8 @@ public class CreateKnowledgeCommandHandler : IRequestHandler<CreateKnowledgeComm
             Log.Information("CreateKnowledgeCommandHandler.Handle: Guardando en repositorio...");
             await _knowledgeRepository.AddKnowledgeAsync(knowledge);
             
-            Log.Information("CreateKnowledgeCommandHandler.Handle: Entrada creada con ID (long): {KnowledgeId}, RowId: {RowId}", knowledge.Id, knowledge.RowId);
-            return $"Knowledge entry created successfully with ID: {knowledge.Id}, RowId: {knowledge.RowId}";
+            Log.Information("CreateKnowledgeCommandHandler.Handle: Entrada creada con RowId: {RowId}", knowledge.RowId);
+            return knowledge.RowId;
         }
         catch (Exception ex)
         {

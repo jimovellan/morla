@@ -37,8 +37,8 @@ public class KnowledgeTools
             Log.Information("KnowledgeTools.SetKnowledge: Enviando comando CreateKnowledge...");
             var result = await _sender.Send(new CreateKnowledgeCommand(topic, title, project, summary, content));
 
-            Log.Information("KnowledgeTools.SetKnowledge: Entrada creada exitosamente con ID {KnowledgeId}", result);
-            return $"Knowledge entry created successfully with ID: {result}";
+            Log.Information("KnowledgeTools.SetKnowledge: Entrada creada exitosamente con RowId {RowId}", result);
+            return $"Knowledge entry created successfully with ID: {result}, RowId: {result}";
         }
         catch (Exception ex)
         {

@@ -10,23 +10,31 @@
     <!-- nombre del comando -->
     <ToolCommandName>morla</ToolCommandName>
     <PackageId>Morla</PackageId>
-    <Version>0.0.9</Version>
+    <Version>0.0.15</Version>
     <Authors>Jim</Authors>
   </PropertyGroup>
 <ItemGroup>
   <None Include="..\..\extensions\*.dll">
     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    <Pack>true</Pack>
+    <PackagePath></PackagePath>
   </None>
   
   <None Include="..\..\extensions\*.so">
     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    <Pack>true</Pack>
+    <PackagePath></PackagePath>
   </None>
   <None Include="..\..\extensions\*.dylib">
     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    <Pack>true</Pack>
+    <PackagePath></PackagePath>
   </None>
-  <None Include="..\..\models\*">
-    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-  </None>
+  <Content Include="..\..\models\**\*">
+    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <Pack>true</Pack>
+    <PackagePath>tools/net10.0/any/models/</PackagePath>
+  </Content>
   <None Include="setup-files\**\*">
     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
   </None>
@@ -46,5 +54,12 @@
     <ProjectReference Include="../morla.hosts.mcp/morla.hosts.mcp.csproj" />
     <ProjectReference Include="../morla.hosts.server/morla.hosts.server.csproj" />
   </ItemGroup>
+
+  <Target Name="CopyModelsFolder" AfterTargets="Build">
+    <ItemGroup>
+      <ModelsFiles Include="..\..\models\**\*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(ModelsFiles)" DestinationFiles="@(ModelsFiles->'$(OutputPath)models\%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
 
 </Project>
