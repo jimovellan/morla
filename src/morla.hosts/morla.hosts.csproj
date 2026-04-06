@@ -24,23 +24,19 @@
   <None Include="..\..\extensions\*.dll">
     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     <Pack>true</Pack>
-    <PackagePath>tools/net10.0/any/</PackagePath>
   </None>
   
   <None Include="..\..\extensions\*.so">
     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     <Pack>true</Pack>
-    <PackagePath>tools/net10.0/any/</PackagePath>
   </None>
   <None Include="..\..\extensions\*.dylib">
     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     <Pack>true</Pack>
-    <PackagePath>tools/net10.0/any/</PackagePath>
   </None>
   <Content Include="..\..\models\**\*">
     <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     <Pack>true</Pack>
-    <PackagePath>tools/net10.0/any/models/</PackagePath>
   </Content>
   <None Include="setup-files\**\*">
     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
