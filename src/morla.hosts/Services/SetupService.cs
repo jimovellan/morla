@@ -68,6 +68,7 @@ public class SetupService
 
     /// <summary>
     /// Obtiene las ubicaciones de configuración según la plataforma
+    /// Solo copia archivos de instrucciones. El MCP se registra con "copilot mcp add"
     /// </summary>
     private List<(string Path, string Description, string SourceFile, string TargetFileName)> GetTargetLocations()
     {
@@ -83,20 +84,12 @@ public class SetupService
                 "memory.instructions.md"
             ),
             
-            // GitHub Copilot en VSCode
-            (
-                Path.Combine(userProfile, ".vscode"),
-                "GitHub Copilot (VSCode MCP config)",
-                "mcp.config.json",
-                "mcp.json"
-            ),
-            
             // Backup centralizado / CLI portability
             (
                 Path.Combine(userProfile, ".config", "morla"),
                 "Configuración centralizada (.config/morla)",
-                "mcp.config.json",
-                "mcp.config.json"
+                "morla.protocol.md",
+                "memory.instructions.md"
             ),
         };
     }
@@ -165,13 +158,17 @@ public class SetupService
 
             Console.WriteLine("\n📝 CONFIGURACIÓN COMPLETADA:");
             Console.WriteLine("─────────────────────────────────────────");
-            Console.WriteLine("✓ Copilot CLI: Lee instrucciones automáticamente");
-            Console.WriteLine("✓ GitHub Copilot (VSCode): MCP configurado");
+            Console.WriteLine("✓ Copilot CLI: Instrucciones cargadas en ~/.copilot/");
             Console.WriteLine("✓ Configuración centralizada: ~/.config/morla/");
-            Console.WriteLine("\n🔗 Próximos pasos:");
-            Console.WriteLine("1. Reinicia tu IDE (VSCode) para que cargue la nueva configuración MCP");
-            Console.WriteLine("2. Inicia una nueva sesión de Copilot CLI para cargar las instrucciones");
-            Console.WriteLine("3. Ejecuta: morla mcp (para iniciar el servidor MCP)");
+            Console.WriteLine("\n🔗 PRÓXIMOS PASOS:");
+            Console.WriteLine("─────────────────────────────────────────");
+            Console.WriteLine("\n1️⃣  REGISTRA EL MCP CON COPILOT:");
+            Console.WriteLine("   $ copilot mcp add morla \"morla mcp\"");
+            Console.WriteLine("\n2️⃣  REINICIA VS CODE para cargar el MCP:");
+            Console.WriteLine("   Archivo → Recargar ventana (o Cmd+Shift+P → Reload Window)");
+            Console.WriteLine("\n3️⃣  VERIFICA QUE EL MCP ESTÁ REGISTRADO:");
+            Console.WriteLine("   $ copilot mcp list");
+            Console.WriteLine("\n4️⃣  INICIA COPILOT Y MORLA ESTARÁ DISPONIBLE");
             Console.WriteLine("─────────────────────────────────────────\n");
         }
         catch (Exception ex)

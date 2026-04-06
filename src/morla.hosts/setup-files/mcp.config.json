@@ -1,10 +1,10 @@
 {
     "servers": {
         "morla": {
-            "command": "dotnet",
-            "args": ["run", "mcp"],
-            "cwd": "/Users/joseignaciomovellan/develop/dotnet/morla/src/morla.hosts",
+            "command": "morla",
+            "args": ["mcp"],
             "env": {}
         }
     }
 }
+
