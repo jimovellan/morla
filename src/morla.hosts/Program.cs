@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Morla.hosts.MCP.Runtime;
 using Morla.hosts.Server.Runtime;
+using Morla.Hosts.UI.Runtime;
 using Morla.hosts.Setup;
 using Morla.Infrastructure.Extensions;
 
@@ -49,11 +50,10 @@ serverCommand.SetHandler(async (int port) =>
 // =====================
 var uiCommand = new Command("ui", "Ejecuta la UI por consola");
 
-uiCommand.SetHandler(() =>
+uiCommand.SetHandler(async () =>
 {
-    Console.WriteLine("Arrancando UI...");
-    // var uiRuntime = new UIRuntime();
-    // await uiRuntime.RunAsync(services, CancellationToken.None);
+    var uiRuntime = new UIRuntime();
+    await uiRuntime.ShowAsync(CancellationToken.None);
 });
 
 // =====================
