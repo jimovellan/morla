@@ -26,6 +26,11 @@ obj/
 *.exe
 *.out
 
+# Excepciones: agregar explicítamente vec0
+!extensions/vec0.dll
+!extensions/vec0.so
+!extensions/vec0.dylib
+
 # NuGet
 .nuget/
 packages/

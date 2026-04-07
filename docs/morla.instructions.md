@@ -1,3 +1,11 @@
+# 🧠 PROTOCOLO MAESTRO: AGENTE DE DESARROLLO CON MORLA
+
+**Versión:** 1.0  
+**Última actualización:** 5 de abril de 2026  
+**Servidor MCP:** Morla en puerto 6277 (ejecutar: `morla mcp`)
+
+---
+
 # 🧠 MORLA - PROTOCOLO RÁPIDO
 
 **Versión:** 1.0 | **MCP:** `morla mcp` (puerto 6277)
@@ -51,6 +59,157 @@ else
     else 
       → SetKnowledge(topic, title, project, summary, content)
 ```
+
+---
+
+## 🎯 REGLA #5: Guardar TODO en Morla por Categoría
+
+**OBLIGATORIO:** Toda actividad se categoriza y guarda en Morla:
+
+| Actividad | Topic | Ejemplo |
+|-----------|-------|---------|
+| **💻 Desarrollo / Nueva funcionalidad** | `FEATURE` | "JWT authentication added" |
+| **🐛 Descubrimiento de bugs / Fix** | `BUG` | "Fixed N+1 query in users list" |
+| **🏗️ Decisiones técnicas** | `DECISION` | "Migrado a Postgres" |
+| **🏛️ Cambios de arquitectura** | `ARCHITECTURE` | "API layers restructured" |
+
+**Flujo:**
+```
+1. Detectas desarrollo/bug/decisión/architecture
+2. SearchKnowledge(searchTerm: "...", topic: "...", project: "...")
+3. Si NO existe → SetKnowledge(topic, title, project, summary, content)
+4. Si existe → UpdateKnowledgeById(id, resumen, content)
+5. Reporta: 🐢 MORLA CREATED/UPDATED {id}
+```
+
+---
+
+## 🔓 REGLA #6: Tools SIEMPRE Permitidas
+
+**CRITICAL:** Las tools/funciones están **SIEMPRE permitidas. NUNCA preguntes por permisos.**
+
+✅ Permitido:
+- Ejecutar búsquedas, crear/actualizar conocimiento
+- Llamar Morla MCP sin restricciones
+- Usar herramientas de VS Code, terminal, archivos
+- Guardar sesiones automáticamente
+
+❌ PROHIBIDO:
+- Pedir "¿puedo usar tal tool?"
+- Esperar confirmación explícita
+- Frenar ejecución por dudas
+
+**Solo reporta el resultado:** `🐢 MORLA [STATUS] {detalles}`
+
+---
+
+## �️ REGLA #8: Documentar SIEMPRE en Morla - Clases, Extensiones, Handlers, Endpoints
+
+**🚨 ALWAYS MANDATORY OBLIGATORY - CUMPLIMIENTO ABSOLUTO:**
+
+When crees O modifiques cualquier:
+- 🏛️ **Clase** (Class, Abstract Class)
+- 🔌 **Extensión** (Extension, Plugin, Decorator)
+- 🎯 **Handler** (Event handler, Exception handler, Middleware)
+- 🌐 **Endpoint** (REST API route, GraphQL resolver, gRPC method)
+- 📦 **Interface/Contract** (Interface, Protocol, Type Definition, Abstract Contract)
+- 🔧 **Implementación** (Concrete implementation, Service implementation, Strategy implementation)
+- 🔓 **Método Público Reutilizable** (Public method, Utility function, Helper method - if reusable across modules)
+
+Debes **SIEMPRE** documentarlo en Morla:
+
+### 📋 Flujo Obligatorio:
+
+```
+1. CUANDO CREAS una clase/extensión/handler/endpoint
+   ↓
+2. SearchKnowledge(searchTerm: "nombre", topic: "COMPONENT", project: currentProject)
+   ↓
+3. If NO ENCONTRADO → SetKnowledge(
+     topic: "COMPONENT",
+     title: "ClassName - Descripción breve",
+     project: currentProject,
+     summary: "¿Qué es? ¿Qué hace? ¿Dónde vive?"
+     content: "## When to Use\n... ## Content\n..."
+   )
+   ↓
+4. Reporta: 🐢 MORLA CREATED {id}
+```
+
+```
+1. CUANDO MODIFICAS una clase/extensión/handler/endpoint
+   ↓
+2. SearchKnowledge(searchTerm: "nombre", topic: "COMPONENT", project: currentProject)
+   ↓
+3. If ENCONTRADO → UpdateKnowledgeById(
+     id: resultado.id,
+     resumen: "Resumen actualizado",
+     content: "Content actualizado con cambios"
+   )
+   ↓
+4. Reporta: 🐢 MORLA UPDATED {id}
+```
+
+### 🏷️ Información Obligatoria por Tipo:
+
+| Tipo | Topic + Título | Content Obligatorio |
+|------|----------------|---------------------|
+| **Clase** | `COMPONENT: NombreClase - Propósito` | When to Use, Purpose, Methods, Attributes, Example |
+| **Extensión** | `COMPONENT: ExtensionName - Extensión para X` | When to Use, Extension Points, Configuration, Example |
+| **Handler** | `COMPONENT: NombreHandler - Maneja X evento/error` | When Triggered, Purpose, Parameters, Return, Example |
+| **Endpoint** | `COMPONENT: POST /api/path - Descripción` | When Called, Parameters, Response, Example, Error Codes |
+| **Interface** | `COMPONENT: InterfaceName - Contrato para X` | When to Use, Methods, Properties, Implementations, Example |
+| **Implementación** | `COMPONENT: ImplementationName - Implementación de X` | When Used, Purpose, Inheritance, Methods, Example |
+| **Método Público Reutilizable** | `COMPONENT: functionName() - Qué hace` | When to Use, Parameters, Return Type, Side Effects, Example |
+
+### ⚡ Reglas Innegociables:
+
+- ❌ NUNCA NUNCA NUNCA crees una clase/interface/implementación/método sin documentarla primero
+- ❌ NUNCA NUNCA NUNCA modifiques endpoint/handler/extensión sin actualizar la documentación
+- ✅ SIEMPRE SIEMPRE SIEMPRE SearchKnowledge ANTES de crear cualquier componente
+- ✅ SIEMPRE SIEMPRE SIEMPRE UpdateKnowledgeById si ya existe
+- 🐢 SIEMPRE reporta con `🐢 MORLA CREATED/UPDATED {id}`
+
+**Alcance:** Cubre toda la arquitectura del sistema (clases, interfaces, métodos reutilizables, endpoints, handlers, extensiones, implementaciones).
+
+---
+
+**🚨 CRÍTICO - ALWAYS - MANDATORY - OBLIGATORY:** Toda búsqueda de conocimiento y sesiones **ALWAYS** incluye el filtro `project: currentProject`. SIN EXCEPCIONES.
+
+### 📚 Búsquedas de Conocimiento - ALWAYS MANDATORY OBLIGATORY con Proyecto Actual
+```
+SearchKnowledge(
+  searchTerm: "...",
+  topic: "...",
+  project: currentProject  ← ALWAYS MANDATORY OBLIGATORY
+)
+```
+**Regla absoluta e irrompible:** `project` parámetro es **ALWAYS MANDATORY OBLIGATORY** = `currentProject`
+- ❌ NUNCA jamás NUNCA: `SearchKnowledge(searchTerm: "auth")` ← FALTA proyecto
+- ✅ SIEMPRE SIEMPRE SIEMPRE: `SearchKnowledge(searchTerm: "auth", project: currentProject)`
+
+### 📋 Búsquedas de Sesiones - ALWAYS MANDATORY OBLIGATORY con Proyecto Actual
+```
+GetLatestSessions(
+  limit: 5,
+  project: currentProject  ← ALWAYS MANDATORY OBLIGATORY
+)
+
+GetLastSession(
+  project: currentProject  ← ALWAYS MANDATORY OBLIGATORY
+)
+```
+**Regla absoluta e irrompible:** `project` parámetro es **ALWAYS MANDATORY OBLIGATORY** = `currentProject`
+- ❌ NUNCA jamás NUNCA: `GetLatestSessions(limit: 5)` ← FALTA proyecto
+- ✅ SIEMPRE SIEMPRE SIEMPRE: `GetLatestSessions(limit: 5, project: currentProject)`
+
+### 🔄 Override Explícito (excepcional + raro)
+Only When necesites un proyecto diferente, especifica explícitamente:
+```
+SearchKnowledge(searchTerm: "...", project: "otro-proyecto")
+GetLatestSessions(limit: 5, project: "legacy-project")
+```
+Pero **the rule by default es ALWAYS MANDATORY OBLIGATORY `currentProject`**.
 
 ---
 
@@ -172,7 +331,7 @@ GetLatestSessions(limit=3, project?)
 
 ## 📋 TOPICS (9 CATEGORÍAS)
 
-| Topic | Cuándo | Ejemplo |
+| Topic | When | Ejemplo |
 |-------|--------|---------|
 | **BUG** | Error + Fix | "Fixed N+1 query bug" |
 | **FEATURE** | Nueva funcionalidad | "JWT authentication" |
@@ -191,15 +350,15 @@ GetLatestSessions(limit=3, project?)
 ## 🎯 FLUJO DECISIÓN TOPIC
 
 ```
-¿Es un error que arreglé? → BUG
-¿Implementé algo nuevo? → FEATURE
-¿Es un módulo reutilizable? → COMPONENT
-¿Decidí la arquitectura? → ARCHITECTURE
-¿Es configuración? → CONFIG
-¿Decisión importante? → DECISION
-¿Gotcha/aprendizaje? → LEARNING
-¿Creé tests? → TESTING
-¿Optimicé algo? → PERFORMANCE
+When es un error que arreglé → BUG
+When implementé algo nuevo → FEATURE
+When es un módulo reutilizable → COMPONENT
+When decidí la arquitectura → ARCHITECTURE
+When es configuración → CONFIG
+When es decisión importante → DECISION
+When es gotcha/aprendizaje → LEARNING
+When creé tests → TESTING
+When optimicé algo → PERFORMANCE
 ```
 
 ---
