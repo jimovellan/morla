@@ -42,8 +42,11 @@
     <Pack>true</Pack>
     <PackagePath>tools/net10.0/any/models/</PackagePath>
   </None>
-  <!-- model.onnx_data se descarga durante SetupService, no se incluye en el paquete (es muy grande: 126MB) -->
-  <!-- Ver: src/morla.hosts/Services/SetupService.cs -->
+  <None Include="..\..\models\model.onnx_data">
+    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <Pack>true</Pack>
+    <PackagePath>tools/net10.0/any/models/</PackagePath>
+  </None>
   <!-- Archivos de tokenizer -->
   <None Include="..\..\models\tokenizer.json">
     <CopyToOutputDirectory>Always</CopyToOutputDirectory>

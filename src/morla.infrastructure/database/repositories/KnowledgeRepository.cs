@@ -25,20 +25,17 @@ public class KnowledgeRepository : IKnowledgeRepository
     }
 
     /// <summary>
-    /// Lazy initialization del embedding generator con descarga automática de modelo si falta
+    /// Lazy initialization del embedding generator (modelo distribuido vía LFS en paquete NuGet)
     /// </summary>
-    private async Task<LocalEmbeddingGenerator> GetEmbeddingGeneratorAsync()
+    private LocalEmbeddingGenerator GetEmbeddingGenerator()
     {
         if (_embeddingGeneratorInitialized && _embeddingGenerator != null)
             return _embeddingGenerator;
 
         try
         {
-            // Descargar modelo ONNX si no existe o está incompleto (> 100MB)
-            await DownloadModelIfNeededAsync();
-
             var folderPath = ModelPathResolver.ResolveModelsPath();
-            Serilog.Log.Information("KnowledgeRepository.GetEmbeddingGeneratorAsync: Inicializando LocalEmbeddingGenerator con modelos desde {Path}", folderPath);
+            Serilog.Log.Information("KnowledgeRepository.GetEmbeddingGenerator: Inicializando LocalEmbeddingGenerator con modelos desde {Path}", folderPath);
 
             var _options = new LocalEmbeddingsOptions
             {
@@ -47,97 +44,17 @@ public class KnowledgeRepository : IKnowledgeRepository
             _embeddingGenerator = new LocalEmbeddingGenerator(_options);
             _embeddingGeneratorInitialized = true;
             
-            Serilog.Log.Information("KnowledgeRepository.GetEmbeddingGeneratorAsync: ✅ LocalEmbeddingGenerator inicializado correctamente");
+            Serilog.Log.Information("KnowledgeRepository.GetEmbeddingGenerator: ✅ LocalEmbeddingGenerator inicializado correctamente");
             return _embeddingGenerator;
         }
         catch (Exception ex)
         {
-            Serilog.Log.Error(ex, "KnowledgeRepository.GetEmbeddingGeneratorAsync: ❌ Error inicializando LocalEmbeddingGenerator");
+            Serilog.Log.Error(ex, "KnowledgeRepository.GetEmbeddingGenerator: ❌ Error inicializando LocalEmbeddingGenerator");
             throw;
         }
     }
 
-    /// <summary>
-    /// Descarga el modelo ONNX_data desde GitHub si no existe o está incompleto
-    /// </summary>
-    private async Task DownloadModelIfNeededAsync()
-    {
-        const string currentVersion = "0.0.37";
-        const string downloadUrl = "https://github.com/jimovellan/morla/releases/download/v{0}/model.onnx_data";
-        const long minFileSize = 100_000_000; // 100 MB
-
-        try
-        {
-            var modelPath = Path.Combine(AppContext.BaseDirectory, "models");
-            var modelFile = Path.Combine(modelPath, "model.onnx_data");
-
-            // Si existe y tiene tamaño correcto, skip
-            if (File.Exists(modelFile))
-            {
-                var fileInfo = new FileInfo(modelFile);
-                if (fileInfo.Length > minFileSize)
-                {
-                    Serilog.Log.Debug("DownloadModelIfNeededAsync: ✅ Modelo ONNX ya existe ({Size} MB)", 
-                        fileInfo.Length / 1_000_000);
-                    return;
-                }
-            }
-
-            // Crear directorio si no existe
-            if (!Directory.Exists(modelPath))
-                Directory.CreateDirectory(modelPath);
-
-            Serilog.Log.Information("DownloadModelIfNeededAsync: ⏳ Descargando modelo ONNX desde GitHub...");
-
-            using var httpClient = new HttpClient();
-            httpClient.DefaultRequestHeaders.Add("User-Agent", "Morla-CLI");
-            httpClient.Timeout = TimeSpan.FromMinutes(15);
-
-            var url = string.Format(downloadUrl, currentVersion);
-            var response = await httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
-            
-            if (!response.IsSuccessStatusCode)
-            {
-                Serilog.Log.Warning("DownloadModelIfNeededAsync: HTTP {StatusCode} descargando modelo", response.StatusCode);
-                return;
-            }
-
-            // Descargar con progreso simple
-            using (var contentStream = await response.Content.ReadAsStreamAsync())
-            using (var fileStream = new FileStream(modelFile, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize: 8192, useAsync: true))
-            {
-                var totalBytes = response.Content.Headers.ContentLength ?? -1L;
-                var totalRead = 0L;
-                var buffer = new byte[8192];
-                int read;
-
-                while ((read = await contentStream.ReadAsync(buffer, 0, buffer.Length)) != 0)
-                {
-                    await fileStream.WriteAsync(buffer, 0, read);
-                    totalRead += read;
-
-                    if (totalBytes != -1)
-                    {
-                        var percentage = (totalRead * 100) / totalBytes;
-                        Serilog.Log.Debug("DownloadModelIfNeededAsync: {Percentage}% ({Current}/{Total} MB)", 
-                            percentage, totalRead / 1_000_000, totalBytes / 1_000_000);
-                    }
-                }
-            }
-
-            Serilog.Log.Information("DownloadModelIfNeededAsync: ✅ Modelo ONNX descargado exitosamente");
-        }
-        catch (HttpRequestException ex)
-        {
-            Serilog.Log.Error(ex, "DownloadModelIfNeededAsync: Error de conexión descargando modelo");
-        }
-        catch (Exception ex)
-        {
-            Serilog.Log.Error(ex, "DownloadModelIfNeededAsync: Error descargando modelo");
-        }
-    }
-
-public async Task AddKnowledgeAsync(Knowledge knowledge)
+    public async Task AddKnowledgeAsync(Knowledge knowledge)
 {
     try
     {
@@ -228,7 +145,7 @@ public async Task AddKnowledgeAsync(Knowledge knowledge)
         foreach (var chunk in chunks)
         {
             // 🟢 Generar con el chunk "rico" en info
-            var generator = await GetEmbeddingGeneratorAsync();
+            var generator = GetEmbeddingGenerator();
             var embedding = await generator.GenerateEmbeddingAsync(chunk);
             
             var vector = embedding.Vector.Span.ToArray();
@@ -357,7 +274,7 @@ public async Task UpdateAsync(Knowledge knowledge)
         foreach (var chunk in chunks)
         {
             // Generar el embedding con el nuevo modelo cargado en el constructor
-            var generator = await GetEmbeddingGeneratorAsync();
+            var generator = GetEmbeddingGenerator();
             var embedding = await generator.GenerateEmbeddingAsync(chunk);
             
             var vector = embedding.Vector.Span.ToArray();
@@ -425,7 +342,7 @@ public async Task UpdateAsync(Knowledge knowledge)
             }
             Serilog.Log.Information("KnowledgeRepository.RegenerateAllEmbeddingsAsync: Embeddings borrados");
 
-            var generator = await GetEmbeddingGeneratorAsync();
+            var generator = GetEmbeddingGenerator();
             int processedCount = 0;
 
             // ✅ Regenerar embeddings para cada documento
@@ -532,7 +449,7 @@ async Task<List<(Knowledge Knowledge, int Score)>> IKnowledgeRepository.SearchAs
             // Solo pasamos a minúsculas para consistencia.
             var textToEmbed = queryPrefix + searchTerm.ToLowerInvariant();
             
-            var embGenerator = await GetEmbeddingGeneratorAsync();
+            var embGenerator = GetEmbeddingGenerator();
             var searchEmbedding = await embGenerator.GenerateEmbeddingAsync(textToEmbed);
             var searchVector = searchEmbedding.Vector.Span.ToArray();
             
