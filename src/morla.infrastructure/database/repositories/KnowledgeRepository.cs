@@ -2,6 +2,7 @@ using ElBruno.LocalEmbeddings;
 using ElBruno.LocalEmbeddings.Options;
 using Microsoft.EntityFrameworkCore;
 using morla.domain.services;
+using morla.infrastructure.services;
 using Morla.Domain.Models;
 using Morla.Domain.Repository;
 using Morla.Infrastructure.Database;
@@ -33,8 +34,8 @@ public class KnowledgeRepository : IKnowledgeRepository
 
         try
         {
-            var folderPath = FindModelsFolder();
-            Serilog.Log.Information("KnowledgeRepository.GetEmbeddingGenerator: Usando carpeta de modelos: {Path}", folderPath);
+            var folderPath = ModelPathResolver.ResolveModelsPath();
+            Serilog.Log.Information("KnowledgeRepository.GetEmbeddingGenerator: Inicializando LocalEmbeddingGenerator con modelos desde {Path}", folderPath);
 
             var _options = new LocalEmbeddingsOptions
             {
@@ -43,46 +44,14 @@ public class KnowledgeRepository : IKnowledgeRepository
             _embeddingGenerator = new LocalEmbeddingGenerator(_options);
             _embeddingGeneratorInitialized = true;
             
-            Serilog.Log.Information("KnowledgeRepository.GetEmbeddingGenerator: LocalEmbeddingGenerator inicializado correctamente desde {ModelPath}", folderPath);
+            Serilog.Log.Information("KnowledgeRepository.GetEmbeddingGenerator: ✅ LocalEmbeddingGenerator inicializado correctamente");
             return _embeddingGenerator;
         }
         catch (Exception ex)
         {
-            Serilog.Log.Error(ex, "KnowledgeRepository.GetEmbeddingGenerator: Error inicializando LocalEmbeddingGenerator");
+            Serilog.Log.Error(ex, "KnowledgeRepository.GetEmbeddingGenerator: ❌ Error inicializando LocalEmbeddingGenerator");
             throw;
         }
-    }
-
-    /// <summary>
-    /// Busca la carpeta de modelos en múltiples ubicaciones
-    /// </summary>
-    private string FindModelsFolder()
-    {
-        var baseDir = AppContext.BaseDirectory;
-        Serilog.Log.Debug("KnowledgeRepository.FindModelsFolder: AppContext.BaseDirectory = {BaseDir}", baseDir);
-
-        // Intenta varias ubicaciones:
-        var searchPaths = new List<string>
-        {
-            Path.Combine(baseDir, "models"),  // Raíz (instalación global tool)
-            Path.Combine(baseDir, "tools", "net10.0", "any", "models"),  // Dentro de tools/
-            Path.Combine(baseDir, "..", "..", "tools", "net10.0", "any", "models"),  // Ruta relativa
-        };
-
-        foreach (var path in searchPaths)
-        {
-            Serilog.Log.Debug("KnowledgeRepository.FindModelsFolder: Buscando en {Path}", path);
-            if (Directory.Exists(path))
-            {
-                Serilog.Log.Information("KnowledgeRepository.FindModelsFolder: ✅ Carpeta encontrada en {Path}", path);
-                return path;
-            }
-        }
-
-        // Si no encuentra nada, usa la primera (producirá error descriptivo)
-        var defaultPath = searchPaths.First();
-        Serilog.Log.Warning("KnowledgeRepository.FindModelsFolder: Carpeta no encontrada en ninguna ubicación. Usando {DefaultPath}", defaultPath);
-        return defaultPath;
     }
 
 public async Task AddKnowledgeAsync(Knowledge knowledge)
