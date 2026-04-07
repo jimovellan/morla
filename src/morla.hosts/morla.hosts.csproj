@@ -11,7 +11,7 @@
     <!-- nombre del comando -->
     <ToolCommandName>morla</ToolCommandName>
     <PackageId>Morla</PackageId>
-    <Version>0.0.35</Version>
+    <Version>0.0.36</Version>
     <Authors>Jim</Authors>
     <Description>Morla is a .NET knowledge base system with MCP support, API server, and CLI for managing structured knowledge with semantic search capabilities using embeddings.</Description>
     <PackageProjectUrl>https://github.com/joseignaciomovellan/morla</PackageProjectUrl>
