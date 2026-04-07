@@ -44,8 +44,7 @@
   </None>
   <None Include="..\..\models\model.onnx_data">
     <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    <Pack>true</Pack>
-    <PackagePath>tools/net10.0/any/models/</PackagePath>
+    <Pack>false</Pack>
   </None>
   <!-- Archivos de tokenizer -->
   <None Include="..\..\models\tokenizer.json">
