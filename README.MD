@@ -1,6 +1,11 @@
-![Morla Logo](assets/image.jpg)
 
-# Morla
+
+<div style="background-color:#0d1117;  
+display:block;
+padding:20px; border-radius:10px; display: flex; justify-content: center">
+  <img src="assets/logo_black.png" width="200"/>
+</div>
+
 
 ## 🚀 Inicio Rápido
 
