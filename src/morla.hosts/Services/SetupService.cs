@@ -178,4 +178,92 @@ public class SetupService
             throw;
         }
     }
+
+    /// <summary>
+    /// Descarga el modelo ONNX_data desde GitHub Releases (demasiado grande para incluir en el paquete)
+    /// </summary>
+    public async Task DownloadModelAsync()
+    {
+        try
+        {
+            const string currentVersion = "0.0.36";
+            const string downloadUrl = "https://github.com/jimovellan/morla/releases/download/v{0}/model.onnx_data";
+            const long minFileSize = 100_000_000; // 100 MB
+
+            var modelPath = Path.Combine(AppContext.BaseDirectory, "models");
+            var modelFile = Path.Combine(modelPath, "model.onnx_data");
+
+            // Si existe y tiene tamaño correcto, skip
+            if (File.Exists(modelFile))
+            {
+                var fileInfo = new FileInfo(modelFile);
+                if (fileInfo.Length > minFileSize)
+                {
+                    Log.Information("SetupService.DownloadModelAsync: ✅ Modelo ONNX ya existe ({Size} MB)", 
+                        fileInfo.Length / 1_000_000);
+                    return;
+                }
+            }
+
+            // Crear directorio si no existe
+            EnsureDirectoryExists(modelPath);
+
+            Console.WriteLine("\n⏳ Descargando modelo ONNX (este proceso puede tardar varios minutos)...");
+            Log.Information("SetupService.DownloadModelAsync: Iniciando descarga desde GitHub");
+
+            using var httpClient = new HttpClient();
+            httpClient.DefaultRequestHeaders.Add("User-Agent", "Morla-CLI");
+            httpClient.Timeout = TimeSpan.FromMinutes(15);
+
+            var url = string.Format(downloadUrl, currentVersion);
+            var response = await httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+            
+            if (!response.IsSuccessStatusCode)
+            {
+                Log.Warning("SetupService.DownloadModelAsync: HTTP {StatusCode} - {ReasonPhrase}", 
+                    response.StatusCode, response.ReasonPhrase);
+                Console.WriteLine($"⚠️  No se pudo descargar el modelo automáticamente");
+                Console.WriteLine($"   Descárgalo manualmente desde:");
+                Console.WriteLine($"   {url}");
+                return;
+            }
+
+            // Descargar con progreso simple
+            var totalBytes = response.Content.Headers.ContentLength ?? -1L;
+            var canReportProgress = totalBytes != -1;
+
+            using (var contentStream = await response.Content.ReadAsStreamAsync())
+            using (var fileStream = new FileStream(modelFile, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize: 8192, useAsync: true))
+            {
+                var totalRead = 0L;
+                var buffer = new byte[8192];
+                int read;
+
+                while ((read = await contentStream.ReadAsync(buffer, 0, buffer.Length)) != 0)
+                {
+                    await fileStream.WriteAsync(buffer, 0, read);
+                    totalRead += read;
+
+                    if (canReportProgress)
+                    {
+                        var percentage = (totalRead * 100) / totalBytes;
+                        Console.Write($"\r   Progreso: {percentage}% ({totalRead / 1_000_000}/{totalBytes / 1_000_000} MB)");
+                    }
+                }
+            }
+
+            Console.WriteLine($"\n✅ Modelo ONNX descargado exitosamente");
+            Log.Information("SetupService.DownloadModelAsync: ✅ Descarga completada");
+        }
+        catch (HttpRequestException ex)
+        {
+            Log.Error(ex, "SetupService.DownloadModelAsync: Error de conexión descargando modelo");
+            Console.WriteLine($"❌ Error de conexión: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "SetupService.DownloadModelAsync: Error descargando modelo");
+            Console.WriteLine($"❌ Error: {ex.Message}");
+        }
+    }
 }
