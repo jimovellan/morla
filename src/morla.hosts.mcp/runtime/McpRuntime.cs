@@ -61,11 +61,23 @@ public class McpRuntime
             
             // ✅ Cargar instrucciones desde archivo
             string instructions = await LoadInstructionsAsync();
-            
-            builder.Services.AddMcpServer()
+   
+            builder.Services.AddMcpServer((a)=>{
+                a.ServerInfo = new ModelContextProtocol.Protocol.Implementation
+                {
+                    Name = "Morla MCP Server",
+                    Description = "Servidor MCP para gestión de base de conocimiento con búsqueda semántica y seguimiento de sesiones.",
+                    Version = "1.0.0",
+                    
+                };
+                a.ServerInstructions = instructions;
+                
+
+            })
                 .WithStdioServerTransport()
                 .WithToolsFromAssembly(typeof(KnowledgeTools).Assembly)
                 .WithResourcesFromAssembly(typeof(KnowledgeTools).Assembly)
+                
                 .WithInstructions(instructions);
 
             Log.Information("McpRuntime: Compilando host...");
