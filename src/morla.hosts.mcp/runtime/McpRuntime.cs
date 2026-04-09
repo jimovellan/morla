@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Morla.Infrastructure.Extensions;
 using morla.infrastructure.tools;
+using Morla.hosts.MCP.Extensions;
 using Serilog;
 
 namespace Morla.hosts.MCP.Runtime;
@@ -57,9 +58,15 @@ public class McpRuntime
             builder.Services.AddCoreServices();
 
             Log.Information("McpRuntime: Configurando servidor MCP...");
+            
+            // ✅ Cargar instrucciones desde archivo
+            string instructions = await LoadInstructionsAsync();
+            
             builder.Services.AddMcpServer()
                 .WithStdioServerTransport()
-                .WithToolsFromAssembly(typeof(KnowledgeTools).Assembly);
+                .WithToolsFromAssembly(typeof(KnowledgeTools).Assembly)
+                .WithResourcesFromAssembly(typeof(KnowledgeTools).Assembly)
+                .WithInstructions(instructions);
 
             Log.Information("McpRuntime: Compilando host...");
             var host = builder.Build();
@@ -77,6 +84,63 @@ public class McpRuntime
         finally
         {
             await Log.CloseAndFlushAsync();  // ✅ Asegurar que se escriben todos los logs
+        }
+    }
+    
+    private async Task<string> LoadInstructionsAsync()
+    {
+        try
+        {
+            // Rutas posibles para instructions.md
+            var possiblePaths = new List<string>
+            {
+                // Ruta relativa desde el dll (para dotnet run)
+                Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "morla.hosts", "setup-files", "instructions.md"),
+                // Ruta absoluta para instalación global
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Morla", "setup-files", "instructions.md"),
+                // Ruta para desarrollador
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config", "Morla", "instructions.md"),
+                // Ruta en el binario publicado
+                Path.Combine(AppContext.BaseDirectory, "setup-files", "instructions.md")
+            };
+            
+            foreach (var path in possiblePaths)
+            {
+                var fullPath = Path.GetFullPath(path);
+                Log.Debug("LoadInstructionsAsync: Intentando cargar desde: {Path}", fullPath);
+                
+                if (File.Exists(fullPath))
+                {
+                    var content = await File.ReadAllTextAsync(fullPath);
+                    Log.Information("LoadInstructionsAsync: Instrucciones cargadas desde {Path}", fullPath);
+                    return content;
+                }
+            }
+            
+            // Fallback: retornar instrucciones mínimas
+            Log.Warning("LoadInstructionsAsync: No se encontró instructions.md, usando fallback");
+            return """
+                # Morla - Knowledge Base Manager
+                
+                Morla provides a persistent knowledge base with semantic search.
+                
+                **Available Tools:**
+                - `SetKnowledge` - Create knowledge entries
+                - `SearchKnowledge` - Search with keyword/topic filters
+                - `GetKnowledgeById` - Retrieve full entry by ID
+                - `UpdateKnowledgeById` - Modify existing entries  
+                - `RegenerateAllEmbeddings` - Regenerate semantic index
+                
+                **Getting Started:**
+                1. Use SearchKnowledge first to check if knowledge exists
+                2. Use SetKnowledge to save new discoveries
+                3. Use UpdateKnowledgeById to keep knowledge current
+                """;
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "LoadInstructionsAsync: Error cargando instrucciones");
+            return "Morla MCP Server - Knowledge base management with semantic search and session tracking.";
         }
     }
 }
