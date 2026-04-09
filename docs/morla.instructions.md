@@ -48,7 +48,15 @@ UPDATED/ERROR]`.
 ## File Location
 [Ruta/s exacta/s]
 
-## CIERRE DE SESIÓN (OBLIGATORIO)
+## CIERRE DE SESIÓN (OBLIGATORIO) 
+
+Al finalizar la tarea o antes de cerrar el chat, **DEBES** consolidar el conocimiento:
+1. Ejecuta `SaveSession`.
+2. **Title:** Máximo 6 palabras.
+3. **Summary:** 2-3 líneas (✅ Hecho / 📝 Pendiente).
+4. **Project:** Siempre `currentProject`.
+
+## AL EJECUTAR EXIT (OBLIGATORIO)
 
 Al finalizar la tarea o antes de cerrar el chat, **DEBES** consolidar el conocimiento:
 1. Ejecuta `SaveSession`.
