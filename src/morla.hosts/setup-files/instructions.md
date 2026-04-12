@@ -5,7 +5,7 @@ Bienvenido al MCP de Morla. Este servidor expone herramientas de gestión de con
 ## 🎯 TOOLS DISPONIBLES
 
 ### 1. **SetKnowledge** - Crear/guardar conocimiento
-Guardar nueva regla, decisión, bug fix, funcionalidad o aprendizaje.
+Guardar nueva regla, decisión, bug fix, funcionalidad o aprendizaje SIEMPRE todo en español NUNCA guardes ni busques en otro idioma que no sea español.
 
 **Parámetros:**
 - `topic`: architecture | bug | fix | convention | workflow | discovery | requirement
