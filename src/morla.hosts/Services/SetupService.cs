@@ -1,7 +1,15 @@
+using System.CommandLine;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Text.Json;
+using System.Text.Json.Nodes;
+using Microsoft.AspNetCore.Mvc;
 using Serilog;
 
 namespace Morla.hosts.Setup;
+
+
+
 
 /// <summary>
 /// Servicio para configurar archivos globales de Morla en diferentes plataformas
@@ -70,7 +78,8 @@ public class SetupService
     /// Obtiene las ubicaciones de configuración según la plataforma
     /// Solo copia archivos de instrucciones. El MCP se registra con "copilot mcp add"
     /// </summary>
-    private List<(string Path, string Description, string SourceFile, string TargetFileName)> GetTargetLocations()
+    private List<(string Path, string Description, string SourceFile, string TargetFileName)> 
+    GetTargetLocations()
     {
         var userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
         
@@ -78,10 +87,10 @@ public class SetupService
         {
             // Copilot CLI (lee automáticamente en cada sesión)
             (
-                Path.Combine(userProfile, ".copilot"),
+                Path.Combine(userProfile, ".config","opencode"),
                 "Copilot CLI (instrucciones automáticas)",
                 "morla.protocol.md",
-                "memory.instructions.md"
+                "morla-memory.instructions.md"
             ),
             
             // Backup centralizado / CLI portability
@@ -89,7 +98,7 @@ public class SetupService
                 Path.Combine(userProfile, ".config", "morla"),
                 "Configuración centralizada (.config/morla)",
                 "morla.protocol.md",
-                "memory.instructions.md"
+                "morla-memory.instructions.md"
             ),
         };
     }
@@ -106,9 +115,104 @@ public class SetupService
 
             var sourceDir = GetSetupFilesDirectory();
             var locations = GetTargetLocations();
+             var userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
 
-            Console.WriteLine("\n🚀 INICIANDO CONFIGURACIÓN DE MORLA MCP");
+            // comprobar que existe el AGENTS.MD en el directorio destino
+            var text = """
+                # Morla
+                ALWAYS READ memory-morla.instructions.md
+            """;
+            if(!File.Exists(Path.Combine(userProfile,".config","opencode", "AGENTS.md")))
+            {
+                Console.WriteLine("⚠️  AGENTS.md no encontrado en el directorio de origen, se creará uno nuevo con instrucciones básicas");
+                //comprobar que tiene la el contenido #morla-mcp
+                File.WriteAllText(Path.Combine(userProfile,".config","opencode", "AGENTS.md"), text);
+
+                Console.WriteLine("✅ AGENTS.md creado en el directorio de origen con instrucciones básicas");
+            }
+            else
+            {
+                Console.WriteLine("✅ AGENTS.md encontrado en el directorio de origen");
+                if(!File.ReadAllText(Path.Combine(userProfile,".config","opencode", "AGENTS.md")).Contains("# Morla"))
+                {
+                    Console.WriteLine("⚠️  AGENTS.md encontrado pero no contiene instrucciones de Morla, se agregarán instrucciones básicas");
+                    File.AppendAllText(Path.Combine(userProfile,".config","opencode", "AGENTS.md"), text);
+                    Console.WriteLine("✅ Instrucciones básicas agregadas a AGENTS.md en el directorio de origen");
+                }
+            }
+
+            
+
+            Console.WriteLine("\n🚀 INICIANDO CONFIGURACIÓN DE MORLA MCP para OpenCode");
             Console.WriteLine($"🖥️  Sistema Operativo: {os}\n");
+
+            
+
+            
+            //leer el archivo .config
+            var modificacion = false;
+            JsonNode configJson = null;
+           
+            var configPath = Path.Combine(userProfile, ".config", "opencode", "opencode.json");
+            
+            if(!File.Exists(configPath))
+            {
+                configJson = new JsonObject();
+                configJson["$schema"] = "https://opencode.ai/config.json";
+                Console.WriteLine("⚠️  Configuración de MCP no encontrada, se creará una nueva configuración en ~/.config/opencode/opencode.json");
+   
+            }else{
+                //leer el JSON existente
+                var jsonText = File.ReadAllText(configPath);
+                configJson = JsonNode.Parse(jsonText) as JsonObject;
+                Console.WriteLine("✅ Configuración de MCP encontrada, se verificará que la sección de Morla esté correctamente configurada");
+            }
+            
+            
+            if(configJson["mcp"] == null)
+            {
+                configJson["mcp"] = new JsonObject();
+                modificacion = true;
+                Console.WriteLine("⚠️  Sección 'mcp' no encontrada en la configuración, se agregará la sección 'mcp'");
+            }else{
+                Console.WriteLine("✅ Sección 'mcp' encontrada en la configuración");
+            }
+
+            var mcpSection = configJson["mcp"];
+
+            
+
+            if(mcpSection["morla"] == null)
+            {
+                var morla = new JsonObject();
+                var cmd = new JsonArray();
+                cmd.Add("morla");
+                cmd.Add("mcp");
+                morla["command"] = cmd;
+                morla["enabled"] = true;
+                morla["type"] = "local";
+                mcpSection["morla"] = morla;
+                modificacion = true;
+                Console.WriteLine("⚠️  MCP 'morla' no encontrado en la configuración, se agregará el MCP 'morla' con comando 'morla mcp'");
+            }else{
+                Console.WriteLine("✅ MCP 'morla' encontrado en la configuración");
+            }
+            
+            if(modificacion){
+                //guardar el nuevo JSON en la ubicación de configuración
+                var json = configJson.ToJsonString(new JsonSerializerOptions { WriteIndented = true });
+                EnsureDirectoryExists(Path.GetDirectoryName(configPath)!);
+                File.WriteAllText(configPath, json);
+                Console.WriteLine("✅ Configuración de MCP actualizada en: " + configPath);
+            }
+
+            
+                // Guardar el nuevo JSON en la ubicación de configuración
+                
+            
+            
+            
+            
 
             var successCount = 0;
             var results = new List<(string Location, string FileName, bool Success)>();
@@ -158,8 +262,8 @@ public class SetupService
 
             Console.WriteLine("\n📝 CONFIGURACIÓN COMPLETADA:");
             Console.WriteLine("─────────────────────────────────────────");
-            Console.WriteLine("✓ Copilot CLI: Instrucciones cargadas en ~/.copilot/");
-            Console.WriteLine("✓ Configuración centralizada: ~/.config/morla/");
+            Console.WriteLine("✓ opencode: Instrucciones cargadas en ~/.config/opencode/");
+            Console.WriteLine("✓ Configuración centralizada: ~/.config/opencode/");
             Console.WriteLine("\n🔗 PRÓXIMOS PASOS:");
             Console.WriteLine("─────────────────────────────────────────");
             Console.WriteLine("\n1️⃣  REGISTRA EL MCP CON COPILOT:");

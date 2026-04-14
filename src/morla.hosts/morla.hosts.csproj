@@ -11,15 +11,18 @@
     <!-- nombre del comando -->
     <ToolCommandName>morla</ToolCommandName>
     <PackageId>Morla</PackageId>
-    <Version>0.0.64</Version>
+    <Version>0.0.66</Version>
     <Authors>Jim</Authors>
+    <AuthorEmail>jimovellan@gmail.com</AuthorEmail>
+    
     <Description>Morla is a .NET knowledge base system with MCP support, API server, and CLI for managing structured knowledge with semantic search capabilities using embeddings.</Description>
-    <PackageProjectUrl>https://github.com/joseignaciomovellan/morla</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/joseignaciomovellan/morla</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/jimovellan/morla</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/jimovellan/morla</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageTags>knowledge-base,mcp,semantic-search,cli,embeddings,dotnet</PackageTags>
-    <ReleaseNotes>https://github.com/joseignaciomovellan/morla/releases</ReleaseNotes>
+    
+    <ReleaseNotes>https://github.com/jimovellan/morla/releases</ReleaseNotes>
   </PropertyGroup>
 <ItemGroup>
   <!-- Extensiones vec0 - solo para paquete, sin copiar a output para evitar duplicación -->
