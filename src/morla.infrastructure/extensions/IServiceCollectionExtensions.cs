@@ -4,7 +4,9 @@ using Morla.Domain.Repository;
 using Morla.Infrastructure.Database;
 using morla.infrastructure.repositories;
 using Morla.Application.Extensions;
+using Morla.Infrastructure.Services;
 using Serilog;
+using morla.infrastructure.tools;
 
 namespace Morla.Infrastructure.Extensions;
 
@@ -37,6 +39,15 @@ public static class IServiceCollectionExtensions
         services.AddApplicationServices();
 
         Log.Information("AddCoreServices: Repositorios registrados");
+
+        // =====================
+        // REGISTER AGENT RULES SERVICE
+        // =====================
+        var agentRulesService = new AgentRulesService();
+        agentRulesService.LoadRulesAtStartup(); // Cargar reglas al iniciar (CRÍTICO)
+        services.AddSingleton(agentRulesService);
+        services.AddScoped<AgentRulesTools>(); // Registrar tools para MCP
+        Log.Information("AddCoreServices: AgentRulesService registrado y reglas cargadas");
 
         //mirar si hay migraciones pendientes y aplicarlas
         using (var scope = services.BuildServiceProvider().CreateScope())

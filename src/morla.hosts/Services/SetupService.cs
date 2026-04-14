@@ -76,7 +76,7 @@ public class SetupService
 
     /// <summary>
     /// Obtiene las ubicaciones de configuración según la plataforma
-    /// Solo copia archivos de instrucciones. El MCP se registra con "copilot mcp add"
+    /// Copia archivos de instrucciones, plugin MCP y configuración
     /// </summary>
     private List<(string Path, string Description, string SourceFile, string TargetFileName)> 
     GetTargetLocations()
@@ -90,7 +90,7 @@ public class SetupService
                 Path.Combine(userProfile, ".config","opencode"),
                 "Copilot CLI (instrucciones automáticas)",
                 "morla.protocol.md",
-                "morla-memory.instructions.md"
+                "memory.instructions.md"
             ),
             
             // Backup centralizado / CLI portability
@@ -98,7 +98,15 @@ public class SetupService
                 Path.Combine(userProfile, ".config", "morla"),
                 "Configuración centralizada (.config/morla)",
                 "morla.protocol.md",
-                "morla-memory.instructions.md"
+                "memory.instructions.md"
+            ),
+            
+            // OpenCode Plugins - Inyección de instrucciones
+            (
+                Path.Combine(userProfile, ".config", "opencode", "plugins"),
+                "Plugin de OpenCode (inyección de instrucciones)",
+                "morla.ts",
+                "morla.ts"
             ),
         };
     }
@@ -117,29 +125,29 @@ public class SetupService
             var locations = GetTargetLocations();
              var userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
 
-            // comprobar que existe el AGENTS.MD en el directorio destino
-            var text = """
-                # Morla
-                ALWAYS READ memory-morla.instructions.md
-            """;
-            if(!File.Exists(Path.Combine(userProfile,".config","opencode", "AGENTS.md")))
-            {
-                Console.WriteLine("⚠️  AGENTS.md no encontrado en el directorio de origen, se creará uno nuevo con instrucciones básicas");
-                //comprobar que tiene la el contenido #morla-mcp
-                File.WriteAllText(Path.Combine(userProfile,".config","opencode", "AGENTS.md"), text);
+            // // comprobar que existe el AGENTS.MD en el directorio destino
+            // var text = """
+            //     # Morla
+            //     ALWAYS READ memory-morla.instructions.md
+            // """;
+            // if(!File.Exists(Path.Combine(userProfile,".config","opencode", "AGENTS.md")))
+            // {
+            //     Console.WriteLine("⚠️  AGENTS.md no encontrado en el directorio de origen, se creará uno nuevo con instrucciones básicas");
+            //     //comprobar que tiene la el contenido #morla-mcp
+            //     File.WriteAllText(Path.Combine(userProfile,".config","opencode", "AGENTS.md"), text);
 
-                Console.WriteLine("✅ AGENTS.md creado en el directorio de origen con instrucciones básicas");
-            }
-            else
-            {
-                Console.WriteLine("✅ AGENTS.md encontrado en el directorio de origen");
-                if(!File.ReadAllText(Path.Combine(userProfile,".config","opencode", "AGENTS.md")).Contains("# Morla"))
-                {
-                    Console.WriteLine("⚠️  AGENTS.md encontrado pero no contiene instrucciones de Morla, se agregarán instrucciones básicas");
-                    File.AppendAllText(Path.Combine(userProfile,".config","opencode", "AGENTS.md"), text);
-                    Console.WriteLine("✅ Instrucciones básicas agregadas a AGENTS.md en el directorio de origen");
-                }
-            }
+            //     Console.WriteLine("✅ AGENTS.md creado en el directorio de origen con instrucciones básicas");
+            // }
+            // else
+            // {
+            //     Console.WriteLine("✅ AGENTS.md encontrado en el directorio de origen");
+            //     if(!File.ReadAllText(Path.Combine(userProfile,".config","opencode", "AGENTS.md")).Contains("# Morla"))
+            //     {
+            //         Console.WriteLine("⚠️  AGENTS.md encontrado pero no contiene instrucciones de Morla, se agregarán instrucciones básicas");
+            //         File.AppendAllText(Path.Combine(userProfile,".config","opencode", "AGENTS.md"), text);
+            //         Console.WriteLine("✅ Instrucciones básicas agregadas a AGENTS.md en el directorio de origen");
+            //     }
+            // }
 
             
 
@@ -266,13 +274,11 @@ public class SetupService
             Console.WriteLine("✓ Configuración centralizada: ~/.config/opencode/");
             Console.WriteLine("\n🔗 PRÓXIMOS PASOS:");
             Console.WriteLine("─────────────────────────────────────────");
-            Console.WriteLine("\n1️⃣  REGISTRA EL MCP CON COPILOT:");
-            Console.WriteLine("   $ copilot mcp add morla \"morla mcp\"");
-            Console.WriteLine("\n2️⃣  REINICIA VS CODE para cargar el MCP:");
-            Console.WriteLine("   Archivo → Recargar ventana (o Cmd+Shift+P → Reload Window)");
+            
+            Console.WriteLine("\n2️⃣  REINICIA opencode para cargar el MCP:");
             Console.WriteLine("\n3️⃣  VERIFICA QUE EL MCP ESTÁ REGISTRADO:");
-            Console.WriteLine("   $ copilot mcp list");
-            Console.WriteLine("\n4️⃣  INICIA COPILOT Y MORLA ESTARÁ DISPONIBLE");
+
+            
             Console.WriteLine("─────────────────────────────────────────\n");
         }
         catch (Exception ex)
