@@ -8,44 +8,65 @@ padding:20px; border-radius:10px; display: flex; justify-content: center">
 
 
 
-## 🚀 Inicio Rápido
+## 🚀 Início Rápido
 
-### 1. Instalar Morla
+### 1. Instalar Morla (como herramienta global)
 ```bash
-dotnet build
-dotnet publish -c Release
-# Luego agregar el ejecutable a tu PATH
+dotnet tool install -g morla
 ```
 
-### 2. Configurar MCP (Obligatorio)
+### 2. Configurar OpenCode (Obligatorio)
+Después de instalar, ejecuta:
 ```bash
 morla setup
 ```
 
 Este comando configura automáticamente:
-- ✅ **Copilot CLI**: Lee instrucciones en `~/.copilot/memory.instructions.md`
-- ✅ **GitHub Copilot (VSCode)**: MCP disponible en `~/.vscode/mcp.json`
+- ✅ **OpenCode Copilot**: MCP disponible en `~/.vscode/mcp.json`
 - ✅ **Configuración centralizada**: Backup en `~/.config/morla/`
+- ✅ **Instrucciones del sistema**: Se cargan en `~/.copilot/memory.instructions.md`
 
 **Después de ejecutar `morla setup`:**
-1. Reinicia VSCode para cargar el MCP
-2. Inicia una nueva sesión de Copilot CLI
-3. Ejecuta el servidor MCP: `morla mcp`
+1. Reinicia VSCode/OpenCode para cargar el MCP en Puerto 6277
+2. Inicia una nueva sesión de Copilot
+3. Morla MCP estará listo para usar automáticamente
 
 ### 3. Usar Morla
 ```bash
-morla mcp        # Inicia servidor MCP (puerto 6277)
-morla server     # Inicia API HTTP (puerto 5000)
+morla mcp        # Inicia servidor MCP (puerto 6277) - OPERATIVO
+morla server     # API HTTP (puerto 5000) - ⏳ PENDIENTE DE DESARROLLO
 morla setup      # Configura archivos globales
 morla help       # Ver ayuda
 ```
 
+### 📝 Nota sobre la IU
+- **MCP Server** ✅ Operativo - Integrado con OpenCode Copilot
+- **API HTTP Server** ⏳ Pendiente de desarrollo
+- **Console UI / TUI** ⏳ Pendiente de desarrollo
+
+## 📋 Logs
+
+Los logs de Morla se guardan en:
+```
+~/.config/morla/logs/
+./logs/  (en el directorio del proyecto durante desarrollo)
+```
+
+Cada ejecución de `morla` genera un archivo de log con timestamp:
+```
+morla-20260414.txt
+```
+Los logs incluyen información de depuración, errores y operaciones del sistema.
+
 ---
 
-#Arquitectura
+## 🏛️ Arquitectura
+
+**Sistema Morla - OpenCode Copilot MCP Server**
+
 ```
                           ┌─────────────────────────┐
-                          │   MyTool.Host (CLI)     │
+                          │   Morla Host (CLI)      │
                           │  Entry Point            │
                           │  System.CommandLine     │
                           └────────────┬────────────┘
@@ -54,8 +75,9 @@ morla help       # Ver ayuda
                    │                   │                   │
                    v                   v                   v
         ┌──────────────────┐ ┌──────────────────┐ ┌──────────────────┐
-        │   MCP HOST       │ │ HTTP API HOST    │ │ CONSOLE UI HOST  │
-        │   (stdio)        │ │ (Web API)        │ │ (TUI / CLI)      │
+        │   MCP HOST ✅    │ │ HTTP API HOST    │ │ CONSOLE UI HOST  │
+        │   (stdio)        │ │ (Web API) ⏳     │ │ (TUI) ⏳          │
+        │   OPERATIVO      │ │ PENDIENTE        │ │ PENDIENTE        │
         └────────┬─────────┘ └────────┬─────────┘ └────────┬─────────┘
                  │                    │                    │
                  └────────────────────┼────────────────────┘
@@ -64,24 +86,27 @@ morla help       # Ver ayuda
                     │   APPLICATION LAYER                │
                     │  • ToolExecutor                    │
                     │  • ToolRegistry                    │
-                    │  • UseCases (ExecuteTool)          │
+                    │  • UseCases (Commands/Queries)     │
                     └─────────────────┬──────────────────┘
                                       │
                     ┌─────────────────v──────────────────┐
                     │   DOMAIN LAYER                     │
-                    │  • ITool                           │
-                    │  • ToolResult                      │
-                    │  • ToolDefinition                  │
+                    │  • Knowledge Entity                │
+                    │  • Session Entity                  │
+                    │  • Repository Interfaces           │
                     └─────────────────┬──────────────────┘
                                       │
                     ┌─────────────────v──────────────────┐
                     │   INFRASTRUCTURE LAYER             │
-                    │  • EchoTool                        │
-                    │  • FileTool                        │
-                    │  • DbTool (EF Core)                │
-                    │  • Http Clients                    │
+                    │  • EF Core (SQLite)                │
+                    │  • Knowledge Repository            │
+                    │  • Session Repository              │
+                    │  • MCP Protocol Handlers           │
+                    │  • ONNX Embeddings                 │
                     └────────────────────────────────────┘
 ```
+
+**Estado:** OpenCode Copilot MCP Server operativo y listo para producción ✅
 
 ## Migraciones de Base de Datos
 
