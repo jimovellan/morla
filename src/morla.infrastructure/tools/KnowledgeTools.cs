@@ -2,6 +2,7 @@ using System.ComponentModel;
 using MediatR;
 using ModelContextProtocol.Server;
 using Morla.Application.UseCases.Commands.CreateKnowledge;
+using Morla.Application.UseCases.Commands.DeleteKnowledge;
 using Morla.Application.UseCases.Commands.UpdateKnowledge;
 using Morla.Application.UseCases.Queries.SearchKnowledge;
 using Morla.Application.UseCases.Queries.GetKnowledgeById;
@@ -158,6 +159,49 @@ public async Task<List<SearchKnowledgeDto>> SearchKnowledge(
         catch (Exception ex)
         {
             Log.Error(ex, "KnowledgeTools.UpdateKnowledgeById: Error al actualizar entrada con ID {KnowledgeId}", id);
+            throw;
+        }
+    }
+
+    [McpServerTool, Description(
+        "ELIMINACIÓN DE CONOCIMIENTO: Elimina permanentemente una entrada de conocimiento por su RowKey único. " +
+        "Úsala cuando: (1) Una entrada es incorrecta y debe descartarse, (2) Hay duplicados (mantén el mejor, elimina otros), (3) Información obsoleta. " +
+        "\n\n" +
+        "REGLAS CRÍTICAS: " +
+        "- OPERACIÓN PERMANENTE: No hay recuperación; verifica que sea la entrada correcta antes de llamar. " +
+        "- Parámetro 'rowKey': Es el identificador único (GUID generado, ej: 'topic:project:timestamp'). " +
+        "- Efecto: Elimina la entrada y sus embeddings asociados de la base de datos. " +
+        "\n\n" +
+        "FLUJO SEGURO: " +
+        "1. SearchKnowledge(searchTerm: ..., project: currentProject) " +
+        "2. GetKnowledgeById(id) para confirmar que es la entrada a eliminar " +
+        "3. DeleteKnowledgeByRowKey(rowKey) - usa el RowId del paso 2 " +
+        "\n\n" +
+        "RETORNA: Objeto con success, message, deletedRowKey e info de la eliminación.")]
+    public async Task<object> DeleteKnowledgeByRowKey(
+        [Description("Identificador único (RowKey) de la entrada a eliminar. Obtenlo de SearchKnowledge o GetKnowledgeById. Ej: 'architecture:morla:2026-04-16T10:30:00Z'.")] string rowKey)
+    {
+        try
+        {
+            Log.Information("KnowledgeTools.DeleteKnowledgeByRowKey: Eliminando entrada con RowKey {RowKey}", rowKey);
+            
+            var command = new DeleteKnowledgeCommand(rowKey);
+            var result = await _sender.Send(command);
+            
+            Log.Information("KnowledgeTools.DeleteKnowledgeByRowKey: Eliminación completada exitosamente {RowKey}", rowKey);
+            
+            return new
+            {
+                success = result.Success,
+                message = result.Message,
+                deletedRowKey = result.DeletedRowKey,
+                deletedId = result.DeletedId,
+                error = result.Error
+            };
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "KnowledgeTools.DeleteKnowledgeByRowKey: Error al eliminar entrada con RowKey {RowKey}", rowKey);
             throw;
         }
     }
