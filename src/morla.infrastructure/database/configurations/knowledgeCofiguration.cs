@@ -30,6 +30,20 @@ namespace Morla.Infrastructure.Database.Configurations
             builder.Property(k => k.Topic).HasMaxLength(100);
             builder.Property(k => k.Project).HasMaxLength(250);
             builder.Property(k => k.Summary).IsRequired();
+            
+            // Soft-delete properties
+            builder.Property(k => k.IsDeleted)
+                .IsRequired()
+                .HasDefaultValue(false)
+                .HasColumnName("IsDeleted");
+            
+            builder.Property(k => k.DeletedAt)
+                .HasColumnName("DeletedAt")
+                .IsRequired(false);  // Nullable
+            
+            // Index for query performance (filter out soft-deleted entries)
+            builder.HasIndex(k => k.IsDeleted)
+                .HasDatabaseName("idx_knowledges_isdeleted");
         }
     }
 }

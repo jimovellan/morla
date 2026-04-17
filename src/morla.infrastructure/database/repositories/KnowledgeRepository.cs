@@ -6,6 +6,7 @@ using morla.infrastructure.services;
 using Morla.Domain.Models;
 using Morla.Domain.Repository;
 using Morla.Infrastructure.Database;
+using Morla.Infrastructure.Database.Extensions;
 using System.Globalization;
 using System.Text;
 
@@ -220,15 +221,28 @@ private static string NormalizeText(string text)
 
     public async Task<Knowledge?> GetByIdAsync(string rowId)
     {
-        return await _context.Knowledges.FirstOrDefaultAsync(k => k.RowId == rowId);  // ✅ Busca por RowId
+        return await _context.Knowledges
+            .WhereNotDeleted()
+            .FirstOrDefaultAsync(k => k.RowId == rowId);  // ✅ Busca por RowId, excluyendo eliminados
+    }
+
+    /// <summary>
+    /// Obtiene un conocimiento por RowId sin filtrar soft-deleted entries (para restore operations)
+    /// </summary>
+    public async Task<Knowledge?> GetByIdIncludingDeletedAsync(string rowId)
+    {
+        return await _context.Knowledges
+            .FirstOrDefaultAsync(k => k.RowId == rowId);  // ✅ Busca por RowId, includiendo eliminados
     }
 
     public async Task<List<Knowledge>> GetAllAsync()
     {
-        return await _context.Knowledges.ToListAsync();
+        return await _context.Knowledges
+            .WhereNotDeleted()
+            .ToListAsync();
     }
 
-public async Task UpdateAsync(Knowledge knowledge)
+public async Task UpdateAsync(Knowledge knowledge, bool updateEmbeddings = true)
 {
     try
     {
@@ -244,21 +258,30 @@ public async Task UpdateAsync(Knowledge knowledge)
         existingKnowledge.Title = knowledge.Title;
         existingKnowledge.Topic = knowledge.Topic;
         existingKnowledge.Project = knowledge.Project;
+        existingKnowledge.IsDeleted = knowledge.IsDeleted;  // ✅ Update soft-delete status
+        existingKnowledge.DeletedAt = knowledge.DeletedAt;  // ✅ Update deletion timestamp
 
         _context.Knowledges.Update(existingKnowledge);
         await _context.SaveChangesAsync();
 
-        // 2. Preparar el texto para los nuevos Embeddings
+        // 2. Skip embedding regeneration for soft-delete/restore operations (updateEmbeddings=false)
+        if (!updateEmbeddings)
+        {
+            Serilog.Log.Information("KnowledgeRepository.UpdateAsync: Saltando regeneración de embeddings para {RowId} (soft-delete/restore)", knowledge.RowId);
+            return;
+        }
+
+        // 3. Preparar el texto para los nuevos Embeddings
         // 🟢 CAMBIO: Usamos el texto original. BGE prefiere acentos y mayúsculas/minúsculas naturales.
         string fullText = $"{existingKnowledge.Title} {existingKnowledge.Summary} {existingKnowledge.Content}";
         
         // Solo pasamos a minúsculas por estandarización, pero NO quitamos acentos.
         var textForEmbedding = fullText.ToLowerInvariant();
 
-        // 3. Dividir en chunks
+        // 4. Dividir en chunks
         var chunks = SplitIntoChunks(textForEmbedding, split_in_chunks);
 
-        // 4. Limpiar embeddings antiguos (esto está perfecto en tu código)
+        // 5. Limpiar embeddings antiguos (esto está perfecto en tu código)
         using (var delCmd = _context.Database.GetDbConnection().CreateCommand())
         {
             delCmd.CommandText = "DELETE FROM knowledges_embedding WHERE rowid = $rowid";
@@ -270,7 +293,7 @@ public async Task UpdateAsync(Knowledge knowledge)
             await delCmd.ExecuteNonQueryAsync();
         }
 
-        // 5. Insertar los nuevos vectores de BGE
+        // 6. Insertar los nuevos vectores de BGE
         foreach (var chunk in chunks)
         {
             // Generar el embedding con el nuevo modelo cargado en el constructor
@@ -400,6 +423,7 @@ public async Task UpdateAsync(Knowledge knowledge)
     }
 
       
+
     /// <summary>
     /// Extrae palabras clave de búsqueda, removiendo stop words comunes
     /// </summary>
@@ -429,13 +453,16 @@ async Task<List<(Knowledge Knowledge, int Score)>> IKnowledgeRepository.SearchAs
         if (string.IsNullOrWhiteSpace(searchTerm))
         {
             var simpleResults = await _context.Knowledges
+                .WhereNotDeleted()
                 .Where(k => (string.IsNullOrEmpty(topic) || k.Topic == topic) &&
                             (string.IsNullOrEmpty(project) || k.Project == project))
                 .ToListAsync();
             return simpleResults.Select(k => (k, 100)).ToList();
         }
 
-        var allKnowledges = await _context.Knowledges.ToListAsync();
+        var allKnowledges = await _context.Knowledges
+            .WhereNotDeleted()
+            .ToListAsync();
         var results = new List<(Knowledge, int)>();
 
         // 1️⃣ BÚSQUEDA VECTORIAL (BGE-Small-v1.5)
@@ -579,6 +606,7 @@ async Task<List<(Knowledge Knowledge, int Score)>> IKnowledgeRepository.SearchAs
             Serilog.Log.Debug("  - Project: {Project}", project ?? "null");
 
             var query = _context.Knowledges
+                .WhereNotDeleted()
                 .Where(k => k.Topic == morla.domain.constants.TopicNames.SESSION_TOPIC);
 
             if (!string.IsNullOrEmpty(project))
@@ -611,6 +639,7 @@ async Task<List<(Knowledge Knowledge, int Score)>> IKnowledgeRepository.SearchAs
             Serilog.Log.Debug("  - Project: {Project}, Limit: {Limit}", project ?? "null", limit);
 
             var query = _context.Knowledges
+                .WhereNotDeleted()
                 .Where(k => k.Topic == morla.domain.constants.TopicNames.SESSION_TOPIC);
 
             if (!string.IsNullOrEmpty(project))

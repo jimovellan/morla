@@ -7,8 +7,9 @@ namespace Morla.Domain.Repository
         Task AddKnowledgeAsync(Knowledge knowledge);
         Task<List<(Knowledge Knowledge, int Score)>> SearchAsync(string? searchTerm = null, string? topic = null, string? project = null, int limit = 5);
         Task<List<Knowledge>> GetAllAsync();
-        Task<Knowledge?> GetByIdAsync(string rowId);  // ✅ Usa RowId (string GUID)
-        Task UpdateAsync(Knowledge knowledge);
+        Task<Knowledge?> GetByIdAsync(string rowId);  // ✅ Usa RowId (string GUID), excluye soft-deleted
+        Task<Knowledge?> GetByIdIncludingDeletedAsync(string rowId);  // ✅ Incluye soft-deleted entries
+        Task UpdateAsync(Knowledge knowledge, bool updateEmbeddings = true);  // ✅ Optional embedding regeneration (false for soft-delete/restore)
         Task DeleteAsync(string rowId);  // ✅ Usa RowId
         Task RegenerateAllEmbeddingsAsync();
         

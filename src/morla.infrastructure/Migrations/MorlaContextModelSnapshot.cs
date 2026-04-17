@@ -21,12 +21,8 @@ namespace morla.infrastructure.Migrations
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("RowId")
-                        .IsRequired()
-                        .HasMaxLength(36)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("Id");
 
                     b.Property<string>("Content")
                         .IsRequired()
@@ -35,9 +31,25 @@ namespace morla.infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("DeletedAt");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(false)
+                        .HasColumnName("IsDeleted");
+
                     b.Property<string>("Project")
                         .HasMaxLength(250)
                         .HasColumnType("TEXT");
+
+                    b.Property<string>("RowId")
+                        .IsRequired()
+                        .HasMaxLength(36)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("RowId");
 
                     b.Property<string>("Summary")
                         .IsRequired()
@@ -58,6 +70,9 @@ namespace morla.infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasAlternateKey("RowId");
+
+                    b.HasIndex("IsDeleted")
+                        .HasDatabaseName("idx_knowledges_isdeleted");
 
                     b.ToTable("Knowledges", (string)null);
                 });

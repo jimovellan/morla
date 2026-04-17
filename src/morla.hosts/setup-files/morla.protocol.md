@@ -77,13 +77,12 @@ else → SearchKnowledge()
 
 ---
 
-## 🛠️ HERRAMIENTAS (5)
+## 🛠️ HERRAMIENTAS (4)
 
 - `SetKnowledge(topic, title, project, summary, content)`
 - `SearchKnowledge(searchTerm?, topic?, project)`
 - `GetKnowledgeById(id)`
 - `UpdateKnowledgeById(id, resumen, content)`
-- `RegenerateAllEmbeddings()`
 
 ---
 

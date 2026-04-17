@@ -3,6 +3,7 @@ using MediatR;
 using ModelContextProtocol.Server;
 using Morla.Application.UseCases.Commands.CreateKnowledge;
 using Morla.Application.UseCases.Commands.DeleteKnowledge;
+using Morla.Application.UseCases.Commands.RestoreKnowledge;
 using Morla.Application.UseCases.Commands.UpdateKnowledge;
 using Morla.Application.UseCases.Queries.SearchKnowledge;
 using Morla.Application.UseCases.Queries.GetKnowledgeById;
@@ -164,31 +165,33 @@ public async Task<List<SearchKnowledgeDto>> SearchKnowledge(
     }
 
     [McpServerTool, Description(
-        "ELIMINACIÓN DE CONOCIMIENTO: Elimina permanentemente una entrada de conocimiento por su RowKey único. " +
-        "Úsala cuando: (1) Una entrada es incorrecta y debe descartarse, (2) Hay duplicados (mantén el mejor, elimina otros), (3) Información obsoleta. " +
+        "ELIMINACIÓN DE CONOCIMIENTO (SOFT-DELETE): Marca una entrada como eliminada sin removerla permanentemente. " +
+        "Úsala cuando: (1) Una entrada es incorrecta pero podría necesitarse luego, (2) Hay duplicados (mantén el mejor, elimina otros), (3) Información obsoleta. " +
         "\n\n" +
-        "REGLAS CRÍTICAS: " +
-        "- OPERACIÓN PERMANENTE: No hay recuperación; verifica que sea la entrada correcta antes de llamar. " +
-        "- Parámetro 'rowKey': Es el identificador único (GUID generado, ej: 'topic:project:timestamp'). " +
-        "- Efecto: Elimina la entrada y sus embeddings asociados de la base de datos. " +
+        "COMPORTAMIENTO POR DEFECTO: " +
+        "- Soft-delete: Marca como eliminada (IsDeleted=true, DeletedAt=timestamp) pero preserva datos para recuperación " +
+        "- Hard-delete: Use hardDelete=true SOLO si necesitas borrado permanente e irreversible " +
         "\n\n" +
         "FLUJO SEGURO: " +
         "1. SearchKnowledge(searchTerm: ..., project: currentProject) " +
         "2. GetKnowledgeById(id) para confirmar que es la entrada a eliminar " +
-        "3. DeleteKnowledgeByRowKey(rowKey) - usa el RowId del paso 2 " +
+        "3. DeleteKnowledgeByRowKey(rowKey) - usa el RowId del paso 2 (soft-delete por defecto) " +
         "\n\n" +
-        "RETORNA: Objeto con success, message, deletedRowKey e info de la eliminación.")]
+        "RECUPERACIÓN: Si eliminaste por error, usa RestoreKnowledgeByRowKey(rowKey) para restaurar. " +
+        "RETORNA: Objeto con success, message, deletedRowKey, isSoftDelete=true|false")]
     public async Task<object> DeleteKnowledgeByRowKey(
-        [Description("Identificador único (RowKey) de la entrada a eliminar. Obtenlo de SearchKnowledge o GetKnowledgeById. Ej: 'architecture:morla:2026-04-16T10:30:00Z'.")] string rowKey)
+        [Description("Identificador único (RowKey) de la entrada a eliminar. Obtenlo de SearchKnowledge o GetKnowledgeById.")] string rowKey,
+        [Description("Force hard-delete (permanent removal). Default: false (soft-delete). CUIDADO: hard-delete es irreversible.")] bool hardDelete = false)
     {
         try
         {
-            Log.Information("KnowledgeTools.DeleteKnowledgeByRowKey: Eliminando entrada con RowKey {RowKey}", rowKey);
+            var operationType = hardDelete ? "hard-delete" : "soft-delete";
+            Log.Information("KnowledgeTools.DeleteKnowledgeByRowKey: Ejecutando {OperationType} para RowKey {RowKey}", operationType, rowKey);
             
-            var command = new DeleteKnowledgeCommand(rowKey);
+            var command = new DeleteKnowledgeCommand(rowKey, hardDelete);
             var result = await _sender.Send(command);
             
-            Log.Information("KnowledgeTools.DeleteKnowledgeByRowKey: Eliminación completada exitosamente {RowKey}", rowKey);
+            Log.Information("KnowledgeTools.DeleteKnowledgeByRowKey: {OperationType} completado para {RowKey}. Success: {Success}", operationType, rowKey, result.Success);
             
             return new
             {
@@ -196,6 +199,7 @@ public async Task<List<SearchKnowledgeDto>> SearchKnowledge(
                 message = result.Message,
                 deletedRowKey = result.DeletedRowKey,
                 deletedId = result.DeletedId,
+                isSoftDelete = result.IsSoftDelete,
                 error = result.Error
             };
         }
@@ -207,32 +211,45 @@ public async Task<List<SearchKnowledgeDto>> SearchKnowledge(
     }
 
     [McpServerTool, Description(
-        "REGENERACIÓN DE ÍNDICE SEMÁNTICO: Recalcula los embeddings (búsqueda por similitud semántica) para TODAS las entradas de conocimiento. " +
-        "Úsala SOLO en estos casos: " +
-        "1. Cambió el modelo de embeddings (LLM diferente, parámetros nuevos). " +
-        "2. Se instaló una nueva versión del KnowledgeTools que usa algoritmo de embeddings diferente. " +
-        "3. Hay bug en la búsqueda semántica (busca mal conceptos relacionados). " +
+        "RECUPERACIÓN DE CONOCIMIENTO: Restaura una entrada que fue soft-eliminada, permitiendo que vuelva a ser visible en búsquedas. " +
+        "Úsala cuando: (1) Eliminaste una entrada por error (soft-delete), (2) Necesitas una entrada que fue archivada. " +
         "\n\n" +
-        "ADVERTENCIA: " +
-        "- Esta operación es PESADA (procesa TODAS las entradas; puede tomar minutos). " +
-        "- Usa SOLO durante mantenimiento, NO en producción sin backup. " +
-        "- NO necesitas llamarla después de SetKnowledge o UpdateKnowledgeById (se actualiza automáticamente). " +
+        "COMPORTAMIENTO: " +
+        "- Solo funciona para entradas que fueron soft-deleted (IsDeleted=true) " +
+        "- Restaura completamente: limpia IsDeleted=false y DeletedAt=null " +
+        "- Los embeddings y contenido se preservan sin cambios " +
         "\n\n" +
-        "RESULTADO: Retorna mensaje de confirmación. Los embeddings se regeneran en background.")]
-    public async Task<string> RegenerateAllEmbeddings()
+        "FLUJO DE RECOVERY: " +
+        "1. SearchKnowledge(...) - encontrará solo entradas ACTIVAS, no las eliminadas " +
+        "2. GetKnowledgeByIdIncludingDeleted(id) - puedes ver entradas eliminadas " +
+        "3. RestoreKnowledgeByRowKey(rowKey) - marca como no-eliminada " +
+        "4. SearchKnowledge(...) - ahora aparecerá nuevamente " +
+        "\n\n" +
+        "RETORNA: Objeto con success, message, restoredRowKey, restoredId")]
+    public async Task<object> RestoreKnowledgeByRowKey(
+        [Description("Identificador único (RowKey) de la entrada a restaurar. Debe ser una entrada soft-deleted.")] string rowKey)
     {
         try
         {
-            Log.Information("KnowledgeTools.RegenerateAllEmbeddings: Iniciando regeneración de todos los embeddings...");
+            Log.Information("KnowledgeTools.RestoreKnowledgeByRowKey: Iniciando restauración para RowKey {RowKey}", rowKey);
             
-            await _knowledgeRepository.RegenerateAllEmbeddingsAsync();
+            var command = new RestoreKnowledgeCommand(rowKey);
+            var result = await _sender.Send(command);
             
-            Log.Information("KnowledgeTools.RegenerateAllEmbeddings: ✅ Regeneración completada exitosamente");
-            return "All embeddings have been regenerated successfully!";
+            Log.Information("KnowledgeTools.RestoreKnowledgeByRowKey: Restauración completada para {RowKey}. Success: {Success}", rowKey, result.Success);
+            
+            return new
+            {
+                success = result.Success,
+                message = result.Message,
+                restoredRowKey = result.RestoredRowKey,
+                restoredId = result.RestoredId,
+                error = result.Error
+            };
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "KnowledgeTools.RegenerateAllEmbeddings: Error al regenerar embeddings");
+            Log.Error(ex, "KnowledgeTools.RestoreKnowledgeByRowKey: Error al restaurar entrada con RowKey {RowKey}", rowKey);
             throw;
         }
     }
@@ -304,17 +321,6 @@ public async Task<List<SearchKnowledgeDto>> SearchKnowledge(
 **Flujo seguro**:
   1. GetKnowledgeById(id) → copiar content anterior
   2. UpdateKnowledgeById(id, resumen_nuevo, content_anterior + cambios_nuevos)
-
----
-
-### 5️⃣ RegenerateAllEmbeddings - REGENERAR ÍNDICE DE BÚSQUEDA SEMÁNTICA
-**Cuándo usar**: RARAMENTE - solo en mantenimiento (cambió modelo de embeddings, bug en búsqueda semántica)
-**Parámetros**: NINGUNO
-**Retorna**: Mensaje de confirmación
-**⚠️ ADVERTENCIA**:
-  - Operación PESADA (procesa TODAS las entradas, puede tomar minutos)
-  - NO llamar después de SetKnowledge/UpdateKnowledgeById (se actualiza automáticamente)
-  - Usar SOLO durante mantenimiento con backup
 
 ---
 

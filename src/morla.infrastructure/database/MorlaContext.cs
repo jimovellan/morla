@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Morla.Domain.Models;
 using Morla.Infrastructure.Database.Interceptors;
 
@@ -17,6 +18,9 @@ namespace Morla.Infrastructure.Database
         {
             base.OnConfiguring(optionsBuilder);
             optionsBuilder.AddInterceptors(new VssInterceptor());
+            
+            // Suppress PendingModelChangesWarning during migrations
+            optionsBuilder.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

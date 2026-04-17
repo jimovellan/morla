@@ -155,11 +155,6 @@ GetLastSession(project)
   - Recupera el contexto de la última sesión guardada
   - Llamar al inicio si el usuario retoma trabajo previo
 
-RegenerateAllEmbeddings()
-  - Reconstruye el índice semántico completo
-  - Usar SOLO si hay problemas con la búsqueda semántica o tras actualizaciones masivas
-  - Operación pesada; no usar en flujo normal
-
 ---COMPUERTAS DE CALIDAD---
 
 Antes de guardar conocimiento verificar:

@@ -3,7 +3,12 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using MediatR;
+using Morla.Application.UseCases.Commands.DeleteKnowledge;
+using Morla.Application.UseCases.Commands.RestoreKnowledge;
+using Morla.hosts.Server.Models;
 using Morla.Infrastructure.Extensions;
+
 namespace Morla.hosts.Server.Runtime;
 
 
@@ -50,6 +55,44 @@ public class HttpRuntime
             return Results.Ok("¡Hola desde el servidor HTTP!");
         })
         .WithName("GetTest");
+
+        // ===== KNOWLEDGE ENDPOINTS =====
+        
+        // DELETE /knowledge/{rowKey} - Soft-delete by default, hard-delete with query param
+        App.MapDelete("/knowledge/{rowKey}", async (string rowKey, [AsParameters] DeleteKnowledgeRequest request, IMediator mediator) =>
+        {
+            if (string.IsNullOrWhiteSpace(rowKey))
+                return Results.BadRequest(new { error = "INVALID_INPUT", message = "rowKey parameter is required" });
+
+            var command = new DeleteKnowledgeCommand(rowKey, request.HardDelete ?? false);
+            var result = await mediator.Send(command);
+
+            return result.Success
+                ? Results.Ok(result)
+                : Results.NotFound(result);
+        })
+        .WithName("DeleteKnowledge")
+        .WithOpenApi()
+        .Produces(200, typeof(DeleteKnowledgeResponse))
+        .Produces(404, typeof(DeleteKnowledgeResponse));
+
+        // POST /knowledge/{rowKey}/restore - Restore soft-deleted entry
+        App.MapPost("/knowledge/{rowKey}/restore", async (string rowKey, IMediator mediator) =>
+        {
+            if (string.IsNullOrWhiteSpace(rowKey))
+                return Results.BadRequest(new { error = "INVALID_INPUT", message = "rowKey parameter is required" });
+
+            var command = new RestoreKnowledgeCommand(rowKey);
+            var result = await mediator.Send(command);
+
+            return result.Success
+                ? Results.Ok(result)
+                : Results.NotFound(result);
+        })
+        .WithName("RestoreKnowledge")
+        .WithOpenApi()
+        .Produces(200, typeof(RestoreKnowledgeResponse))
+        .Produces(404, typeof(RestoreKnowledgeResponse));
 
         await App.RunAsync($"http://localhost:{Port}");
     }
