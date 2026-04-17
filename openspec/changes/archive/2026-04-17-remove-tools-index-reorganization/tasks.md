@@ -33,4 +33,4 @@
 
 - [x] 6.1 Create git commit with changes
 - [x] 6.2 Verify all changes are committed
-- [ ] 6.3 Archive this change using openspec tooling
+- [x] 6.3 Archive this change using openspec tooling
